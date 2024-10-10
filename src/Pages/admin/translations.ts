@@ -166,10 +166,15 @@ const translations = [
     { id: "couponGroupQuantitySuffix", en: "coupons", jp: "枚作成します。" },
     { id: "couponGroupMaxUsesPrefix", en: "Each coupon can be used", jp: "各クーポンは" },
     { id: "couponGroupMaxUsesSuffix", en: "times", jp: "回までご利用いただけます。" },
-    { id: "couponGroupUnlimitedUsesSuffix", en: "an unlimited number of times", jp: "無制限にご利用いただけます。" },    
-    { id: "couponGroupCodeSource", en: "Source of coupon codes", jp: "クーポンコードのソース" },    
-    { id: "couponGroupCodesProvided", en: "I will provide the coupon codes", jp: "クーポンコードを提供します" },    
-    { id: "couponGroupCodesGenerated", en: "Please create coupon codes on the server automatically", jp: "クーポンコードをサーバー上で自動的に作成してください" },    
+    { id: "couponGroupUnlimitedUsesSuffix", en: "an unlimited number of times", jp: "無制限にご利用いただけます。" },
+    { id: "couponGroupCodeSource", en: "Source of coupon codes", jp: "クーポンコードのソース" },
+    { id: "couponGroupCodesProvided", en: "I will provide the coupon codes", jp: "クーポンコードを提供します" },
+    { id: "couponGroupCodesGenerated", en: "Please create random coupon codes on the server automatically", jp: "サーバー上でランダムなクーポンコードを自動的に作成してください" },
+    { id: "couponGroupStemPrefix", en: "Include at the", jp: "クーポンコードの" },
+    { id: "couponGroupStemSuffix", en: "in all coupon codes", jp: "という文字を含めます。" },
+    { id: "couponGroupStemBefore", en: "▼ beginning", jp: "▼ 先頭に" },
+    { id: "couponGroupStemAfter", en: "▼ end", jp: "▼ 末尾に" },
+    { id: "couponGroupGeneratedExamples", en: "Example coupon codes:", jp: "クーポンコードの例:" },
     
 ];
 

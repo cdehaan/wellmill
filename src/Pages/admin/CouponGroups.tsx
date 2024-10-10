@@ -28,9 +28,9 @@ const emptyCouponGroup: CouponGroupFields = {
   name: "",
   quantity: 1,
   codeStem: "",
-  isCodePrefixed: false,
+  isCodePrefixed: true,
   jumbleLength: 0,
-  isUnambiguous: false,
+  isUnambiguous: true,
   type: 1,
   target: 0,
   reward: 0,
@@ -45,10 +45,64 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
   const [showAddCouponGroup, setShowAddCouponGroup] = useState<boolean>(false);   
   const [newCouponGroup, setNewCouponGroup] = useState<CouponGroupFields>(emptyCouponGroup);
   const [codeSourceRadioValue, setCodeSourceRadioValue] = useState<string>("csv");
+  const [csvCodes, setCsvCodes] = useState<string>("");
 
   const couponGroups = adminData?.couponGroups;
   const products = adminData?.products;
+
+  const reasonableTextRegex = /^[0-9a-zA-Z\s\-%.!$&()*+,\/:;<=>?@[\]^_{|}~]+$/;
+
   if (!couponGroups || !products) return <span>Loading coupon groups and products...</span>;
+
+  function handleNewCouponGroupChange(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
+    const key = event.target.name as CouponGroupFieldKey;
+    const value = event.target.value;
+    console.log(`Setting ${key} to ${value}`);
+    if (newCouponGroup) {
+      setNewCouponGroup({...newCouponGroup, [key]: value});
+    } else {
+      setNewCouponGroup({...emptyCouponGroup, [key]: value});
+    }
+  }
+
+  function handleRadioChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setCodeSourceRadioValue(event.target.value);
+  };
+
+  const handleCSVChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const trimValue = event.target.value.replace(/\s+/g, '').replace(/,/g, ', ');
+    setCsvCodes(trimValue);
+  };
+
+  const handleCsvFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const contents = (event.target?.result as string).replace(/\s+/g, '').replace(/,/g, ', '); // remove all spaces, except one after a comma
+      if(!reasonableTextRegex.test(contents)) {
+        console.error("Invalid CSV file contents");
+        return;
+      }
+
+      if (csvCodes && window.confirm('The text input already has content. Do you want to overwrite it?')) {
+        setCsvCodes(contents);
+      } else if (!csvCodes) {
+        setCsvCodes(contents);
+      }
+    }
+    reader.readAsText(file);
+  };
+
+  const handleStemLocationChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    if (newCouponGroup) {
+      setNewCouponGroup({...newCouponGroup, isCodePrefixed: value === "before"});
+    } else {
+      setNewCouponGroup({...emptyCouponGroup, isCodePrefixed: value === "before"});
+    }
+  }
+
 
   const couponExplanationJp = (
     <div style={{display: "inline-flex", flexDirection:"column", border:"1px solid #888", borderRadius: "0.5rem", padding: "0.5rem", margin: "0.5rem"}}>
@@ -72,6 +126,13 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
   const addCouponGroupButton = (
     <button onClick={() => setShowAddCouponGroup(true)}>{getText("addCouponGroup", language)}</button>
   );
+
+  const requiredCombinations = ((newCouponGroup?.quantity || 1) * ((newCouponGroup?.quantity || 1) - 1)) / (2 * 0.01);
+  const suggestedJumbleLength = Math.max(5, Math.ceil(Math.log(requiredCombinations) / Math.log(56)));
+  const exampleCodes = Array.from({length: 3}, (_, i) => {
+    const code = `${newCouponGroup.isCodePrefixed ? newCouponGroup.codeStem : ""}${"a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9".substring(i*6, suggestedJumbleLength+i*6)}${newCouponGroup.isCodePrefixed ? "" : newCouponGroup.codeStem}`;
+    return code;
+  });
 
   const numberInputStyle = {
     width: "10rem",
@@ -100,7 +161,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
 
   const addCouponGroupModal = (
     <div style={{position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", backgroundColor: "rgba(0,0,0,0.5)", zIndex: 100}}>
-      <div style={{display:"flex", flexDirection:"column", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", backgroundColor: "#fff", padding: "1rem", borderRadius: "0.5rem"}}>
+      <div style={{display:"flex", flexDirection:"column", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", maxHeight:"90%", overflow:"scroll", backgroundColor: "#fff", padding: "1rem", borderRadius: "0.5rem"}}>
         <h3>{getText("addCouponGroup", language)}</h3>
 
         <div style={questionDivStyle}>
@@ -118,29 +179,44 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
         <div style={questionDivStyle}>
           <label>{getText("couponGroupMaxUsesPrefix", language)}</label>
           <div>
-            <div>
-              <input type="radio" id="limitedUses" name="couponUsage" value="limited" defaultChecked onChange={handleNewCouponGroupChange} style={{ marginRight: '0.5rem' }} />
+            <div style={{background: newCouponGroup.maxUses === null ? "#888" : "#fff"}}>
+              <input type="radio" id="limitedUses" name="couponUsage" value="limited" defaultChecked /*onChange={}*/ style={{ marginRight: '0.5rem' }} />
               <input type="number" style={numberInputSmallStyle} onChange={handleNewCouponGroupChange} value={newCouponGroup?.maxUses || 1} name="maxUses" />
               <label>{getText("couponGroupMaxUsesSuffix", language)}</label>
             </div>
-            <div>
-              <input type="radio" id="unlimitedUses" name="couponUsage" value="unlimited" onChange={handleNewCouponGroupChange} style={{ marginRight: '0.5rem' }} />
+            <div style={{background: newCouponGroup.maxUses === null ? "#fff" : "#888"}}>
+              <input type="radio" id="unlimitedUses" name="couponUsage" value="unlimited" onChange={() => {setNewCouponGroup(prev => { return {...prev, maxUses: null}})}} style={{ marginRight: '0.5rem' }} />
               <label>{getText("couponGroupMaxUsesSuffix", language)}</label>
             </div>
           </div>
         </div>
 
-        <div style={{...questionDivStyle, flexDirection:"column", alignItems: "start"}}>
+        <div style={{...questionDivStyle, flexDirection:"column", alignItems: "start", gap:"1rem", width: "100%"}}>
           <label>{getText("couponGroupCodeSource", language)}</label>
 
-          <div style={codeSourceRadioValue === "csv" ? {background: "#fff"} : {background: "#ccc"}}>
+          <div style={{width:"100%", padding: "0.5rem", background: codeSourceRadioValue === "csv" ? "#fff": "#ccc", color: codeSourceRadioValue === "csv" ? "#000": "#888" }}>
             <input type="radio" id="csv" name="codeSource" value="csv" onChange={handleRadioChange} style={{ marginRight: '0.5rem' }} defaultChecked />
             <label>{getText("couponGroupCodesProvided", language)}</label>
+            <textarea style={{width: "100%", height: "5rem", margin: 0, padding:"0.5rem", fontSize:"1rem", background:"rgba(255,255,255,0.5"}} onChange={handleCSVChange} value={csvCodes} placeholder="coupon123, coupon321, coupon278" />
+            <input type="file" accept=".csv,.txt" onChange={handleCsvFileChange} />
           </div>
 
-          <div style={codeSourceRadioValue === "generated" ? {background: "#fff"} : {background: "#ccc"}}>
+          <div style={{width:"100%", padding: "0.5rem", background: codeSourceRadioValue === "generated" ? "#fff": "#ccc", color: codeSourceRadioValue === "generated" ? "#000": "#888" }}>
             <input type="radio" id="generated" name="codeSource" value="generated" onChange={handleRadioChange} style={{ marginRight: '0.5rem' }} />
             <label>{getText("couponGroupCodesGenerated", language)}</label>
+            <div style={{display:"flex", alignItems:"center"}}>
+              <label>{getText("couponGroupStemPrefix", language)}</label>
+              <select onChange={handleStemLocationChange} style={{padding:"0.5rem", width:"unset", fontSize:"unset", margin: 0, marginLeft: "0.5rem", color: codeSourceRadioValue === "generated" ? "#000": "#888" }}>
+                <option value="before">{getText("couponGroupStemBefore", language)}</option>
+                <option value="after">{getText("couponGroupStemAfter", language)}</option>
+              </select>
+              <input type="text" style={{...numberInputSmallStyle, width:"10rem"}} onChange={handleNewCouponGroupChange} value={newCouponGroup?.codeStem || ""} name="codeStem" />
+              <label>{getText("couponGroupStemSuffix", language)}</label>
+            </div>
+            <label>{getText("couponGroupGeneratedExamples", language)}</label>
+            <ul>
+              {exampleCodes.map((code, i) => <li key={i}>{code}</li>)}
+            </ul>
           </div>
         </div>
 
@@ -169,21 +245,6 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
       </div>
     </div>
   );
-
-  function handleNewCouponGroupChange(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-    const key = event.target.name as CouponGroupFieldKey;
-    const value = event.target.value;
-    console.log(`Setting ${key} to ${value}`);
-    if (newCouponGroup) {
-      setNewCouponGroup({...newCouponGroup, [key]: value});
-    } else {
-      setNewCouponGroup({...emptyCouponGroup, [key]: value});
-    }
-  }
-
-  function handleRadioChange(event: React.ChangeEvent<HTMLInputElement>) {
-    setCodeSourceRadioValue(event.target.value);
-  };
 
   return (
     <div>
