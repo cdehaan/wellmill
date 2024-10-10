@@ -278,6 +278,16 @@ app.post('/adminFetch', async (req, res) => {
     return res.status(500).send('Error fetching coupon data');
   }
 
+  query = "SELECT * FROM couponGroup";
+  values = [];
+  try {
+    const [couponGroupData] = await pool.query(query, values);
+    returnData.couponGroups = couponGroupData;
+  } catch(error) {
+    console.error('Error fetching coupon group data:', error);
+    return res.status(500).send('Error fetching coupon group data');
+  }
+
   query = "SELECT * FROM image";
   values = [];
   try {
@@ -624,6 +634,156 @@ app.post('/adminCouponDelete', async (req, res) => {
     return res.status(500).send('Error deleting coupon');
   }
 });
+
+app.post('/adminCouponGroupCreate', async (req, res) => {
+  const subdomains = req.subdomains;
+  const subdomain = subdomains.length > 0 ? subdomains[0] : null;
+  console.log(`░▒▓█ Hit adminCouponGroupCreate. Subdomain: [${subdomain}] Time: ${CurrentTime()}`);
+  console.log(req.body);
+  const stageSubdomain = subdomain === "stage" ? true : false;
+  const pool = stageSubdomain ? poolStage : poolProduction;
+
+  const requestData = req.body.data;
+  const tokenRegex = /^[0-9a-z]+$/i;
+  if(requestData.token && !tokenRegex.test(requestData.token)) { return res.status(400).send("Malformed token"); }
+  console.log("Clean Token: " + requestData.token);
+  const token = requestData.token;
+  if (token !== process.env.ADMIN_TOKEN) { return res.status(401).send("Unauthorized"); }
+
+  const alphanumericRegex = /^[0-9a-z]+$/i;
+  const reasonableTextRegex = /^[0-9a-zA-Z\s\-%.!$&()*+,\/:;<=>?@[\]^_`{|}~]+$/;
+  const couponGroup = requestData.couponGroup;
+
+  const codeList = couponGroup.codeList;
+  const codeArray = codeList ? codeList.split(",").map(item => item.trim()) : [];
+  const hasInvalidCode = codeArray.some(code => !reasonableTextRegex.test(code));
+  if(hasInvalidCode) { return res.status(400).send("Malformed code list"); }
+
+  const couponGroupName = couponGroup.name;
+  if(!reasonableTextRegex.test(couponGroupName)) { return res.status(400).send("Malformed coupon group name"); }
+  const codeStem = couponGroup.codeStem;
+  if(!reasonableTextRegex.test(codeStem)) { return res.status(400).send("Malformed code stem"); }
+
+  const isCodePrefixed = !!couponGroup.isCodePrefixed;
+  const isUnambiguous = !!couponGroup.isUnambiguous;
+
+  const couponQuantity = couponGroup.couponQuantity === undefined ? undefined : Number(couponGroup.couponQuantity);
+  if(isNaN(couponQuantity) || couponQuantity <= 0) { return res.status(400).send("Malformed coupon quantity"); }
+  const jumbleLength = couponGroup.jumbleLength === undefined ? undefined : Number(couponGroup.jumbleLength);
+  if(isNaN(jumbleLength) || jumbleLength <= 0) { return res.status(400).send("Malformed jumble length"); }
+  const productKey = couponGroup.productKey === undefined ? undefined : Number(couponGroup.productKey);
+  if(isNaN(productKey) || productKey <= 0) { return res.status(400).send("Malformed productKey"); }
+  const type = couponGroup.type === undefined ? undefined : Number(couponGroup.type);
+  if(isNaN(type) || type <= 0) { return res.status(400).send("Malformed type"); }
+  const target = couponGroup.target === undefined ? undefined : Number(couponGroup.target);
+  if(isNaN(target) || target < 0) { return res.status(400).send("Malformed target"); }
+  const reward = couponGroup.reward === undefined ? undefined : Number(couponGroup.reward);
+  if(isNaN(reward) || reward <= 0) { return res.status(400).send("Malformed reward"); }
+  const maxUses = couponGroup.maxUses === undefined ? undefined : Number(couponGroup.maxUses);
+  if(isNaN(maxUses) || maxUses <= 0) { return res.status(400).send("Malformed maxUses"); }
+
+  query = "INSERT INTO couponGroup (name, codeStem, isCodePrefixed, jumbleLength, isUnambiguous, type, target, reward, maxUses) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+  values = [couponGroupName, codeStem, isCodePrefixed, jumbleLength, isUnambiguous, type, target, reward, maxUses];
+  let couponGroupKey;
+
+  try {
+    const [result] = await pool.query(query, values);
+    couponGroupKey = result.insertId;
+  } catch(error) {
+    console.error('Error creating coupon:', error);
+    return res.status(500).send('Error creating coupon');
+  }
+
+  let couponCreationResults = {statusCode: 400, message: "Needed content for list or stem creation not found"};
+  if(codeArray.length > 0 && type !== undefined && target !== undefined && reward !== undefined && maxUses !== undefined) {
+    couponCreationResults = await createCouponsFromList(codeArray, productKey, type, target, reward, maxUses, couponGroupKey);
+  } else if(codeStem !== undefined && jumbleLength !== undefined && type !== undefined && target !== undefined && reward !== undefined && maxUses !== undefined) {
+    couponCreationResults = await createCouponsFromStem(codeStem, isCodePrefixed, couponQuantity, jumbleLength, isUnambiguous, productKey, type, target, reward, maxUses, couponGroupKey);
+  }
+  return res.status(couponCreationResults.statusCode).send(couponCreationResults.message);
+});
+
+async function createCouponsFromList(codeArray, productKey, type, target, reward, maxUses, couponGroupKey) {
+  const uniqueCodes = [...new Set(codeArray)];
+
+  try {
+    // Check if codes already exist in the database
+    const checkQuery = 'SELECT code FROM coupon WHERE code IN (?)';
+    const [existingCoupons] = await pool.query(checkQuery, [uniqueCodes]);
+    const existingCodes = new Set(existingCoupons.map(row => row.code));
+    const newCodes = uniqueCodes.filter(code => !existingCodes.has(code));
+
+    // Collect all coupon data in an array
+    const couponsData = await Promise.all(newCodes.map(async code => {
+      const hash = await sha1(code);
+      return [code, hash, productKey, type, target, reward, maxUses, couponGroupKey];
+    }));
+
+    // Construct the bulk INSERT query
+    const query = `
+      INSERT INTO coupon (code, hash, productKey, type, target, reward, maxUses, couponGroupKey) 
+      VALUES ?`;
+
+    // Use pool.query once to insert all the rows in couponData
+    await pool.query(query, [couponsData]);
+    console.log('Coupons created from list successfully');
+    return { statusCode: 200 }
+  } catch (error) {
+    console.error('Error creating coupons:', error);
+    return { statusCode: 500, message: "Error creating coupons from list"}
+  }
+}
+
+async function createCouponsFromStem(codeStem, isCodePrefixed, couponQuantity, jumbleLength, isUnambiguous, productKey, type, target, reward, maxUses, couponGroupKey) {
+  const unambiguousChars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+  const ambiguousChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charSet = isUnambiguous ? unambiguousChars : ambiguousChars;
+
+  try {
+    const generatedCodes = new Set();
+    const couponData = [];
+
+    // make twice as many codes as needed to account for duplicates
+    while (couponData.length < couponQuantity * 2) {
+      const currentJumble = Array.from({ length: jumbleLength }, () => charSet[Math.floor(Math.random() * charSet.length)]).join('');
+      const currentCode = isCodePrefixed ? codeStem + currentJumble : currentJumble + codeStem;
+
+      // If code has already been generated, skip it
+      if (generatedCodes.has(currentCode)) continue;
+
+      generatedCodes.add(currentCode);
+      const hash = await sha1(currentCode);
+      couponData.push([currentCode, hash, productKey, type, target, reward, maxUses, couponGroupKey]);
+    }
+
+    const checkQuery = 'SELECT code FROM coupon WHERE code IN (?)';
+    const [existingCoupons] = await pool.query(checkQuery, [[...generatedCodes]]);
+    const existingCodes = new Set(existingCoupons.map(row => row.code));
+
+    // Filter couponData to remove codes that already exist in the database
+    const unusedCouponData = couponData.filter(([code]) => !existingCodes.has(code));
+
+    // Trim filteredCouponData to match the desired couponQuantity
+    const finalCouponData = unusedCouponData.slice(0, couponQuantity);
+
+    if (finalCouponData.length < couponQuantity) {
+      console.warn('Warning: More than 50% of generated codes were duplicates');
+    }
+
+    // Construct the bulk INSERT query
+    const query = `
+      INSERT INTO coupon (code, hash, productKey, type, target, reward, maxUses, couponGroupKey) 
+      VALUES ?`;
+
+    // Use pool.query once to insert all rows at once
+    await pool.query(query, [finalCouponData]);
+    console.log('Coupons created from stem successfully');
+    return { statusCode: 200 }
+  } catch (error) {
+    console.error('Error creating coupons:', error);
+    return { statusCode: 500, message: "Error creating coupons from stem"}
+  }
+}
 
 app.post('/adminProductCreate', async (req, res) => {
   const subdomains = req.subdomains;

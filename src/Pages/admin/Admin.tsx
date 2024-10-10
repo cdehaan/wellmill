@@ -8,6 +8,7 @@ import Coupons from "./Coupons";
 import Products from "./Products";
 import Login from "./Login";
 import { LanguageType, getText } from "./translations";
+import CouponGroups from "./CouponGroups";
 
 const registeredEmails = [
   "aya.sakamoto@reprocell.com",
@@ -130,6 +131,9 @@ export default function Admin() {
     case "Coupons":
       currentElement = <Coupons adminData={adminData} loadAdminData={loadAdminData} language={language} />
       break;
+    case "CouponGroups":
+      currentElement = <CouponGroups adminData={adminData} loadAdminData={loadAdminData} language={language} />
+      break;
     default:
       currentElement = dashboard;
   }
@@ -149,6 +153,7 @@ export default function Admin() {
         <span style={{color: "#369"}} onClick={() => {setCurrentScreen("Products")}}>{getText("products", language)}</span>
         <span style={{color: "#369"}} onClick={() => {setCurrentScreen("Images")}}> › {getText("images", language)}</span>
         <span style={{color: "#369"}} onClick={() => {setCurrentScreen("Coupons")}}> › {getText("coupons", language)}</span>
+        <span style={{color: "#369"}} onClick={() => {setCurrentScreen("CouponGroups")}}> › {getText("coupongroups", language)}</span>
         <hr style={{width: "12rem"}} />
         <select value={language} onChange={(e) => setLanguage(e.target.value as LanguageType)}>
           <option value="jp">日本語 ▼</option>

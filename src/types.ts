@@ -118,6 +118,18 @@ export type Coupon = {
     reward: number,
     code?: string, // This is a secret, never sent to the customer
 }
+
+export type CouponGroup = {
+    couponGroupKey: number,
+    codeStem: string,
+    isCodePrefixed: boolean,
+    jumbleLength: number,
+    isUnambiguous: boolean,
+    type: number,
+    target: number,
+    reward: number,
+    maxUses: number,
+}
 //#endregion
 
 
@@ -240,6 +252,7 @@ export type AdminDataType = {
     purchases: Purchase[],
     products: Product[],
     coupons: Coupon[],
+    couponGroups: CouponGroup[],
     images: Image[],
     lineItems: LineItem[],
   }

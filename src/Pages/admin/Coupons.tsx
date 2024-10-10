@@ -13,7 +13,6 @@ type CouponFields = {
   couponKey?: number;
   productKey: number | null;
   code?: string; // this is a secret, never sent to the customer
-  hash: string;
   type: number;
   target: number;
   reward: number;
@@ -21,7 +20,6 @@ type CouponFields = {
 
 const emptyCoupon: CouponFields = {
   productKey: null,
-  hash: "",
   code: "",
   type: 1,
   target: 0,
@@ -135,10 +133,8 @@ export default function Coupons({ adminData, loadAdminData, language }: CouponsP
       loadAdminData();
     }, 500);
   }
-
-    
-
   //#endregion Add coupon
+
 
   const couponListHeader = (
     <div style={{display: "flex", flexDirection:"row", backgroundColor:"#9cf", padding:"0.5rem"}}>
