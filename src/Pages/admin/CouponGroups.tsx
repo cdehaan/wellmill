@@ -27,7 +27,7 @@ const emptyCouponGroup: CouponGroupFields = {
   productKey: null,
   name: "",
   quantity: 1,
-  codeStem: "",
+  codeStem: "WMCoupon-",
   isCodePrefixed: true,
   jumbleLength: 0,
   isUnambiguous: true,
@@ -46,6 +46,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
   const [newCouponGroup, setNewCouponGroup] = useState<CouponGroupFields>(emptyCouponGroup);
   const [codeSourceRadioValue, setCodeSourceRadioValue] = useState<string>("csv");
   const [csvCodes, setCsvCodes] = useState<string>("");
+  const [quantityMemory, setQuantityMemory] = useState<number>(1);
 
   const couponGroups = adminData?.couponGroups;
   const products = adminData?.products;
@@ -178,14 +179,20 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
 
         <div style={questionDivStyle}>
           <label>{getText("couponGroupMaxUsesPrefix", language)}</label>
-          <div>
-            <div style={{background: newCouponGroup.maxUses === null ? "#888" : "#fff"}}>
-              <input type="radio" id="limitedUses" name="couponUsage" value="limited" defaultChecked /*onChange={}*/ style={{ marginRight: '0.5rem' }} />
-              <input type="number" style={numberInputSmallStyle} onChange={handleNewCouponGroupChange} value={newCouponGroup?.maxUses || 1} name="maxUses" />
+          <div style={{display: "flex", flexDirection:"column", flexGrow: 1}}>
+            <div style={{padding: "0.25rem", background: newCouponGroup.maxUses === null ? "#ccc" : "#fff", color: newCouponGroup.maxUses === null ? "#888" : "#000"}}>
+              <input type="radio" id="limitedUses" name="couponUsage" value="limited" defaultChecked onClick={() => {
+                if (newCouponGroup.maxUses === null) {
+                  setNewCouponGroup(prev => {
+                    return {...prev, maxUses: quantityMemory}
+                  });
+                }
+              }} style={{ marginRight: '0.5rem' }} />
+              <input type="number" id="maxUses" disabled={newCouponGroup.maxUses === null} style={numberInputSmallStyle} onChange={handleNewCouponGroupChange} value={newCouponGroup?.maxUses || quantityMemory} name="maxUses" />
               <label>{getText("couponGroupMaxUsesSuffix", language)}</label>
             </div>
-            <div style={{background: newCouponGroup.maxUses === null ? "#fff" : "#888"}}>
-              <input type="radio" id="unlimitedUses" name="couponUsage" value="unlimited" onChange={() => {setNewCouponGroup(prev => { return {...prev, maxUses: null}})}} style={{ marginRight: '0.5rem' }} />
+            <div style={{padding: "0.25rem", background: newCouponGroup.maxUses === null ? "#fff" : "#ccc", color: newCouponGroup.maxUses === null ? "#000" : "#888"}}>
+              <input type="radio" id="unlimitedUses" name="couponUsage" value="unlimited" onClick={() => {setQuantityMemory(parseInt((document.getElementById("maxUses") as HTMLInputElement).value)); setNewCouponGroup(prev => { return {...prev, maxUses: null}})}} style={{ marginRight: '0.5rem' }} />
               <label>{getText("couponGroupMaxUsesSuffix", language)}</label>
             </div>
           </div>
@@ -197,8 +204,11 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
           <div style={{width:"100%", padding: "0.5rem", background: codeSourceRadioValue === "csv" ? "#fff": "#ccc", color: codeSourceRadioValue === "csv" ? "#000": "#888" }}>
             <input type="radio" id="csv" name="codeSource" value="csv" onChange={handleRadioChange} style={{ marginRight: '0.5rem' }} defaultChecked />
             <label>{getText("couponGroupCodesProvided", language)}</label>
-            <textarea style={{width: "100%", height: "5rem", margin: 0, padding:"0.5rem", fontSize:"1rem", background:"rgba(255,255,255,0.5"}} onChange={handleCSVChange} value={csvCodes} placeholder="coupon123, coupon321, coupon278" />
-            <input type="file" accept=".csv,.txt" onChange={handleCsvFileChange} />
+            <textarea disabled={codeSourceRadioValue !== "csv"} style={{width: "100%", height: "5rem", margin: 0, padding:"0.5rem", fontSize:"1rem", background:"rgba(255,255,255,0.5"}} onChange={handleCSVChange} value={csvCodes} placeholder="coupon123, coupon321, coupon278" />
+            <div>
+              <input disabled={codeSourceRadioValue !== "csv"} type="file" accept=".csv,.txt" onChange={handleCsvFileChange} />
+              <span style={{fontSize:"0.75rem"}}>{getText("couponGroupUploadExplanation", language)}</span>
+            </div>
           </div>
 
           <div style={{width:"100%", padding: "0.5rem", background: codeSourceRadioValue === "generated" ? "#fff": "#ccc", color: codeSourceRadioValue === "generated" ? "#000": "#888" }}>
@@ -206,11 +216,11 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
             <label>{getText("couponGroupCodesGenerated", language)}</label>
             <div style={{display:"flex", alignItems:"center"}}>
               <label>{getText("couponGroupStemPrefix", language)}</label>
-              <select onChange={handleStemLocationChange} style={{padding:"0.5rem", width:"unset", fontSize:"unset", margin: 0, marginLeft: "0.5rem", color: codeSourceRadioValue === "generated" ? "#000": "#888" }}>
+              <select disabled={codeSourceRadioValue !== "generated"} onChange={handleStemLocationChange} style={{padding:"0.5rem", width:"unset", fontSize:"unset", margin: 0, marginLeft: "0.5rem", color: codeSourceRadioValue === "generated" ? "#000": "#888" }}>
                 <option value="before">{getText("couponGroupStemBefore", language)}</option>
                 <option value="after">{getText("couponGroupStemAfter", language)}</option>
               </select>
-              <input type="text" style={{...numberInputSmallStyle, width:"10rem"}} onChange={handleNewCouponGroupChange} value={newCouponGroup?.codeStem || ""} name="codeStem" />
+              <input disabled={codeSourceRadioValue !== "generated"} type="text" style={{...numberInputSmallStyle, width:"10rem"}} onChange={handleNewCouponGroupChange} value={newCouponGroup?.codeStem || ""} name="codeStem" />
               <label>{getText("couponGroupStemSuffix", language)}</label>
             </div>
             <label>{getText("couponGroupGeneratedExamples", language)}</label>
