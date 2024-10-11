@@ -151,9 +151,9 @@ const translations = [
     { id: "couponProduct", en: "Product", jp: "商品" },
     { id: "couponReward", en: "Reward", jp: "報酬" },
 
-    { id: "couponYenDiscount", en: "~~¥ Off", jp: "~~¥ 割引" },
-    { id: "couponPercentDiscount", en: "~~% Off", jp: "~~% 割引" },
-    { id: "couponProductDiscount", en: "Product Discount", jp: "製品割引" },
+    { id: "couponYenDiscount", en: "▼ ~~¥ Off", jp: "▼ ~~¥ 割引" },
+    { id: "couponPercentDiscount", en: "▼ ~~% Off", jp: "▼ ~~% 割引" },
+    { id: "couponProductDiscount", en: "▼ Product Discount", jp: "▼ 製品割引" },
 
     { id: "couponExplanation", en: "Coupon Explanation", jp: "クーポン説明" },
 

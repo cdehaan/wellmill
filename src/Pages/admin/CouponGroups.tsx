@@ -135,11 +135,15 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
     return code;
   });
 
+  const csvCouponQuantity = csvCodes.split(',').map(code => code.trim()).filter(code => code.length > 0).length;
+  const productSelectDisabled = parseInt((document.getElementById("couponTypeSelect") as HTMLInputElement)?.value ?? 0) !== 3;
+
   const numberInputStyle = {
-    width: "10rem",
+    height: "4rem",
+    boxsizing: "border-box",
     margin: "0 0.5rem",
     fontSize: "1.25rem",
-    padding: "1rem",
+    padding: "0 1rem",
     backgroundColor: "#fff",
     borderRadius: "0.5rem",
     border: "1px solid #888",
@@ -231,17 +235,15 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
         </div>
 
 
-        <label>{getText("couponProduct", language)}</label>
-        <select onChange={handleNewCouponGroupChange} value={newCouponGroup?.productKey || ""} name="productKey" style={{marginTop: 0}}>
-          {products.map((product) => <option key={product.productKey} value={product.productKey}>{product.title}</option>)}
-        </select>
-        <label>{getText("couponType", language)}</label>
-        <select onChange={handleNewCouponGroupChange} value={newCouponGroup?.type || 1} name="type" style={{marginTop: 0}}>
-          <option value={1}>{getText("couponYenDiscount", language)}</option>
-          <option value={2}>{getText("couponPercentDiscount", language)}</option>
-          <option value={3}>{getText("couponProductDiscount", language)}</option>
-        </select>
-        <div style={{display:"grid", gridTemplateColumns:"50% 50%"}}>
+        <div style={{display:"grid", gridTemplateColumns:"33% 33% 34%"}}>
+          <div style={{display: "flex", flexDirection:"column"}}>
+          <label>{getText("couponType", language)}</label>
+            <select id="couponTypeSelect" onChange={handleNewCouponGroupChange} value={newCouponGroup?.type || 1} name="type" style={{marginTop: 0}}>
+              <option value={1}>{getText("couponYenDiscount", language)}</option>
+              <option value={2}>{getText("couponPercentDiscount", language)}</option>
+              <option value={3}>{getText("couponProductDiscount", language)}</option>
+            </select>
+          </div>
           <div style={{display: "flex", flexDirection:"column"}}>
             <label>{getText("couponTarget", language)}</label>
             <input type="number" style={numberInputStyle} onChange={handleNewCouponGroupChange} value={newCouponGroup?.target || 0} name="target" />
@@ -251,6 +253,10 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
             <input type="number" style={numberInputStyle} onChange={handleNewCouponGroupChange} value={newCouponGroup?.reward || 0} name="reward"/>
           </div>
         </div>
+        <label>{getText("couponProduct", language)}</label>
+        <select disabled={productSelectDisabled} onChange={handleNewCouponGroupChange} value={newCouponGroup?.productKey || ""} name="productKey" style={{marginTop: 0, background: productSelectDisabled ? "#ccc" : "#fff"}}>
+          {products.map((product) => <option key={product.productKey} value={product.productKey}>{product.title}</option>)}
+        </select>
         <button onClick={() => {setShowAddCouponGroup(false)}}>{getText("cancel", language)}</button>
       </div>
     </div>
