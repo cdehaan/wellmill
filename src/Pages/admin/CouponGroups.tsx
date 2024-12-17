@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { AdminDataType } from "../../types";
-import CallAPI from "../../Utilities/CallAPI";
 import { LanguageType, getText } from "./translations";
 
 type CouponGroupsProps = {
@@ -39,7 +38,7 @@ const emptyCouponGroup: CouponGroupFields = {
 
 type CouponGroupFieldKey = keyof CouponGroupFields;
 
-const token = window.location.search ? new URLSearchParams(window.location.search).get('token') || "" : localStorage.getItem('token') || "";
+//const token = window.location.search ? new URLSearchParams(window.location.search).get('token') || "" : localStorage.getItem('token') || "";
 
 export default function CouponGroups({ adminData, loadAdminData, language }: CouponGroupsProps) {
   const [showAddCouponGroup, setShowAddCouponGroup] = useState<boolean>(false);   
@@ -135,7 +134,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
     return code;
   });
 
-  const csvCouponQuantity = csvCodes.split(',').map(code => code.trim()).filter(code => code.length > 0).length;
+  //const csvCouponQuantity = csvCodes.split(',').map(code => code.trim()).filter(code => code.length > 0).length;
   const productSelectDisabled = parseInt((document.getElementById("couponTypeSelect") as HTMLInputElement)?.value ?? 0) !== 3;
 
   const numberInputStyle = {

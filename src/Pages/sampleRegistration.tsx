@@ -87,20 +87,20 @@ function SampleRegistration() {
 
   function ToggleResearchAgreement() { setResearchAgreement(prev => { return !prev;}) }
 
-  function getFormattedDate() {
-    const today = new Date();
-    const year = today.getFullYear();
-    // Add 1 because getMonth() returns month from 0-11
-    const month = today.getMonth() + 1;
-    const day = today.getDate();
-
-    // Pad the month and day with a leading zero if they are less than 10
-    const formattedMonth = month < 10 ? `0${month}` : month;
-    const formattedDay = day < 10 ? `0${day}` : day;
-
-    // Format the date in YYYY年MM月DD日 format
-    return `${year}年${formattedMonth}月${formattedDay}日`;
-  }
+//  function getFormattedDate() {
+//    const today = new Date();
+//    const year = today.getFullYear();
+//    // Add 1 because getMonth() returns month from 0-11
+//    const month = today.getMonth() + 1;
+//    const day = today.getDate();
+//
+//    // Pad the month and day with a leading zero if they are less than 10
+//    const formattedMonth = month < 10 ? `0${month}` : month;
+//    const formattedDay = day < 10 ? `0${day}` : day;
+//
+//    // Format the date in YYYY年MM月DD日 format
+//    return `${year}年${formattedMonth}月${formattedDay}日`;
+//  }
 
   const registrationMessage = <span className={sampleBackupData?.Status === 200 ? styles.goodReply : styles.badReply}>{
     (!sampleBackupData) ? null : // No reply, don't display anything
@@ -120,7 +120,7 @@ function SampleRegistration() {
   //console.dir(sampleBackupData);
 
   const subdomain = window.location.hostname.split('.')[0];
-  const staging = subdomain === 'stage';
+  //const staging = subdomain === 'stage';
 
   //const forceSignin = (!userLoading && !user?.customerKey && kentaiIdLock);
   //const forceSignin = staging ? (!userLoading && !user?.firstName) : (!userLoading && !user?.customerKey && kentaiIdLock);
@@ -183,6 +183,7 @@ function SampleRegistration() {
         </div>
         <span className={styles.checkboxFooter}>研究利用への同意は任意です。</span>
         <span className={styles.checkboxFooter}>チェックを外していただいてもサービスはご利用いただけます。</span>
+        <img src="https://shop.well-mill.com/wellmillNewyears2025.png" alt="Well Mill Newyears message 2025" style={{width: "100%", maxWidth: "400px", margin: "1rem 0"}} />
         <button onClick={handleSubmit}>登録</button>
         <span>{registrationMessage}</span>
         {sampleBackupError && (<span>Server error: {sampleBackupError}</span>)}
