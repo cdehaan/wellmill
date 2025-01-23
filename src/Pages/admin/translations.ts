@@ -150,6 +150,7 @@ const translations = [
     { id: "couponTarget", en: "Target", jp: "ターゲット" },
     { id: "couponProduct", en: "Product", jp: "商品" },
     { id: "couponReward", en: "Reward", jp: "報酬" },
+    { id: "couponCount", en: "Coupons: ", jp: "クーポン: " },
 
     { id: "couponYenDiscount", en: "▼ ~~¥ Off", jp: "▼ ~~¥ 割引" },
     { id: "couponPercentDiscount", en: "▼ ~~% Off", jp: "▼ ~~% 割引" },
@@ -170,6 +171,8 @@ const translations = [
     { id: "couponGroupCodeSource", en: "Source of coupon codes", jp: "クーポンコードのソース" },
     { id: "couponGroupCodesProvided", en: "I will provide the coupon codes", jp: "クーポンコードを提供します" },
     { id: "couponGroupUploadExplanation", en: "You can upload a csv file of coupon codes", jp: "クーポンコードのcsvファイルをアップロードできます" },
+    { id: "couponGroupTextareaFull", en: "The textbox is full, you cannot type in any more codes.", jp: "テキストボックスがいっぱいです。csv ファイルを使用してください。" },
+    { id: "couponGroupTextareaOverflow", en: " characters are hidden in the textbox, but loaded correctly.", jp: "文字が切り捨てられましたが、正しく読み込まれました。" },
     { id: "couponGroupCodesGenerated", en: "Create random coupon codes on the server automatically", jp: "サーバー上でランダムなクーポンコードを自動的に作成します" },
     { id: "couponGroupStemPrefix", en: "Include at the", jp: "クーポンコードの" },
     { id: "couponGroupStemSuffix", en: "in all coupon codes", jp: "という文字を含めます。" },

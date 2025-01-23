@@ -119,7 +119,7 @@ function SampleRegistration() {
 
   //console.dir(sampleBackupData);
 
-  const subdomain = window.location.hostname.split('.')[0];
+  //const subdomain = window.location.hostname.split('.')[0];
   //const staging = subdomain === 'stage';
 
   //const forceSignin = (!userLoading && !user?.customerKey && kentaiIdLock);

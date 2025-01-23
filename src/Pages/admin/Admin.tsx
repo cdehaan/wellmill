@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import CallAPI from "../../Utilities/CallAPI";
 import { AdminDataType } from "../../types";
 import Customers from "./Customers";
@@ -25,11 +25,8 @@ export default function Admin() {
   const [error, setError] = useState<string>("");
   const [email, setEmail] = useState<string>("");
 
-  useEffect(() => {
-    checkAuthentication();
-  }, []);
-
-  function checkAuthentication(email?: string, token?: string) {
+  //function checkAuthentication(email?: string, token?: string) {
+  const checkAuthentication = useCallback((email?: string, token?: string) => {
     if(!email) {
       email = localStorage.getItem('email') || undefined;
     }
@@ -49,7 +46,11 @@ export default function Admin() {
     } else {
       setIsAuthenticated(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    checkAuthentication();
+  }, [checkAuthentication]);
 
   const handleLogin = (email: string, token: string) => {
     checkAuthentication(email, token);
@@ -161,6 +162,7 @@ export default function Admin() {
         </select>
         <hr style={{width: "12rem"}} />
         <span style={{fontFamily: "mono", fontSize: "0.6rem"}}>{email}</span><br/><span style={{ width: "1rem", height: "1rem", border: "1px solid #800", display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0.25rem", background: "rgba(255,128,128,0.5)", fontSize: "0.8rem", }} onClick={handleLogout}>X</span>
+        <div style={{fontSize: "0.8rem", textAlign: "end"}}><span onClick={() => {setCurrentScreen("CouponGroups")}}>©</span><span> 2025</span></div>
       </div>
       <div style={{height: "100%", overflowY: "auto", width: "100%"}}>
         {currentElement}
