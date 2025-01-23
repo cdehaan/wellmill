@@ -183,7 +183,7 @@ function SampleRegistration() {
         </div>
         <span className={styles.checkboxFooter}>研究利用への同意は任意です。</span>
         <span className={styles.checkboxFooter}>チェックを外していただいてもサービスはご利用いただけます。</span>
-        <img src="https://shop.well-mill.com/wellmillNewyears2025.png" alt="Well Mill Newyears message 2025" style={{width: "100%", maxWidth: "400px", margin: "1rem 0"}} />
+        <img src="https://shop.well-mill.com/wellmillNewyears2025.png" alt="Well Mill Newyears message 2025" style={{display: "none", width: "100%", maxWidth: "400px", margin: "1rem 0"}} />
         <button onClick={handleSubmit}>登録</button>
         <span>{registrationMessage}</span>
         {sampleBackupError && (<span>Server error: {sampleBackupError}</span>)}
