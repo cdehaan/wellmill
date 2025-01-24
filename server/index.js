@@ -652,34 +652,49 @@ app.post('/adminCouponGroupCreate', async (req, res) => {
 
   const alphanumericRegex = /^[0-9a-z]+$/i;
   const reasonableTextRegex = /^[0-9a-zA-Z\s\-%.!$&()*+,\/:;<=>?@[\]^_`{|}~]+$/;
-  const couponGroup = requestData.couponGroup;
+  const veryReasonableTextRegex = /^[0-9a-zA-Z\-%.!$&+=^_~]+$/;
 
-  const codeList = couponGroup.codeList;
-  const codeArray = codeList ? codeList.split(",").map(item => item.trim()) : [];
-  const hasInvalidCode = codeArray.some(code => !reasonableTextRegex.test(code));
-  if(hasInvalidCode) { return res.status(400).send("Malformed code list"); }
+  const newCouponGroupSpecs = requestData.couponGroup;
 
-  const couponGroupName = couponGroup.name;
-  if(!reasonableTextRegex.test(couponGroupName)) { return res.status(400).send("Malformed coupon group name"); }
-  const codeStem = couponGroup.codeStem;
-  if(!reasonableTextRegex.test(codeStem)) { return res.status(400).send("Malformed code stem"); }
+  const codeList = newCouponGroupSpecs.codeList;
+  const codeArray = Array.isArray(codeList)
+    ? codeList
+    : typeof codeList === 'string'
+      ? codeList.split(",").map(item => item.trim())
+      : [];
 
-  const isCodePrefixed = !!couponGroup.isCodePrefixed;
-  const isUnambiguous = !!couponGroup.isUnambiguous;
+  const invalidCode = codeArray.find(code => !veryReasonableTextRegex.test(code));
+  if(invalidCode) { return res.status(400).send("Malformed code: " + invalidCode); }
 
-  const couponQuantity = couponGroup.couponQuantity === undefined ? undefined : Number(couponGroup.couponQuantity);
+  const hasDuplicates = codeArray.length !== new Set(codeArray).size;
+  if(hasDuplicates) { return res.status(400).send("Duplicate codes found in list"); }
+
+  const longCode = codeArray.find(code => code.length > 50);
+  if(longCode) { return res.status(400).send("Coupon code over 50 characters found: " + longCode); }
+
+
+  const couponGroupName = newCouponGroupSpecs.name || `CouponGroup${new Date().toISOString().split('.')[0]}`;
+  if(!veryReasonableTextRegex.test(couponGroupName)) { return res.status(400).send("Malformed coupon group name"); }
+
+  const codeStem = newCouponGroupSpecs.codeStem;
+  if(!veryReasonableTextRegex.test(codeStem)) { return res.status(400).send("Malformed code stem"); }
+
+  const isCodePrefixed = !!newCouponGroupSpecs.isCodePrefixed;
+  const isUnambiguous = !!newCouponGroupSpecs.isUnambiguous;
+
+  const couponQuantity = newCouponGroupSpecs.couponQuantity === undefined ? undefined : Number(newCouponGroupSpecs.couponQuantity);
   if(isNaN(couponQuantity) || couponQuantity <= 0) { return res.status(400).send("Malformed coupon quantity"); }
-  const jumbleLength = couponGroup.jumbleLength === undefined ? undefined : Number(couponGroup.jumbleLength);
+  const jumbleLength = newCouponGroupSpecs.jumbleLength === undefined ? undefined : Number(newCouponGroupSpecs.jumbleLength);
   if(isNaN(jumbleLength) || jumbleLength <= 0) { return res.status(400).send("Malformed jumble length"); }
-  const productKey = couponGroup.productKey === undefined ? undefined : Number(couponGroup.productKey);
+  const productKey = newCouponGroupSpecs.productKey === undefined ? undefined : Number(newCouponGroupSpecs.productKey);
   if(isNaN(productKey) || productKey <= 0) { return res.status(400).send("Malformed productKey"); }
-  const type = couponGroup.type === undefined ? undefined : Number(couponGroup.type);
+  const type = newCouponGroupSpecs.type === undefined ? undefined : Number(newCouponGroupSpecs.type);
   if(isNaN(type) || type <= 0) { return res.status(400).send("Malformed type"); }
-  const target = couponGroup.target === undefined ? undefined : Number(couponGroup.target);
+  const target = newCouponGroupSpecs.target === undefined ? undefined : Number(newCouponGroupSpecs.target);
   if(isNaN(target) || target < 0) { return res.status(400).send("Malformed target"); }
-  const reward = couponGroup.reward === undefined ? undefined : Number(couponGroup.reward);
+  const reward = newCouponGroupSpecs.reward === undefined ? undefined : Number(newCouponGroupSpecs.reward);
   if(isNaN(reward) || reward <= 0) { return res.status(400).send("Malformed reward"); }
-  const maxUses = couponGroup.maxUses === undefined ? undefined : Number(couponGroup.maxUses);
+  const maxUses = newCouponGroupSpecs.maxUses === undefined ? undefined : Number(newCouponGroupSpecs.maxUses);
   if(isNaN(maxUses) || maxUses <= 0) { return res.status(400).send("Malformed maxUses"); }
 
   query = "INSERT INTO couponGroup (name, codeStem, isCodePrefixed, jumbleLength, isUnambiguous, type, target, reward, maxUses) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -694,7 +709,7 @@ app.post('/adminCouponGroupCreate', async (req, res) => {
     return res.status(500).send('Error creating coupon');
   }
 
-  let couponCreationResults = {statusCode: 400, message: "Needed content for list or stem creation not found"};
+  let couponCreationResults = {statusCode: 400, message: "Needed content for list or server creation not found"};
   if(codeArray.length > 0 && type !== undefined && target !== undefined && reward !== undefined && maxUses !== undefined) {
     couponCreationResults = await createCouponsFromList(codeArray, productKey, type, target, reward, maxUses, couponGroupKey);
   } else if(codeStem !== undefined && jumbleLength !== undefined && type !== undefined && target !== undefined && reward !== undefined && maxUses !== undefined) {
