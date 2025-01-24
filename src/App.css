@@ -18,6 +18,10 @@ body.no-scroll {
   text-align: center;
 }
 
+.no-style {
+  all: unset;
+}
+
 a {
   text-decoration: none;
   color: unset;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AdminDataType } from "../../types";
 import { LanguageType, getText } from "./translations";
 
@@ -48,12 +48,23 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
   const [quantityMemory, setQuantityMemory] = useState<number>(1);
 
   const [codeTextareaError, setCodeTextareaError] = useState<string>("");
+  const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(false);
 
   const couponGroups = adminData?.couponGroups;
   const products = adminData?.products;
 
   //const reasonableTextRegex = /[^\w!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?\s]/;
   const reasonableTextRegex = /^[0-9a-zA-Z\s\-%.!$&()*+,/:;<=>?@[\]^_{|}~]+$/;
+
+  function handleToggleDetails () {
+    if (codeSourceRadioValue !== "generated" || isDetailsOpen) setIsDetailsOpen(false);
+  }
+
+  useEffect(() => {
+    if (codeSourceRadioValue !== "generated") {
+      setIsDetailsOpen(false);
+    }
+  }, [codeSourceRadioValue]);
 
   if (!couponGroups || !products) return <span>Loading coupon groups and products...</span>;
 
@@ -101,7 +112,8 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      let contents = (event.target?.result as string).replace(/\s+/g, '').replace(/,/g, ', '); // remove all spaces, except one after a comma
+      // remove all spaces, then add one after each comma
+      let contents = (event.target?.result as string).replace(/\s+/g, '').replace(/,/g, ', ');
 
       // Check if content is valid csv and sets error message if needed
       if (!validateCsvText(contents)) { return };
@@ -194,7 +206,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
 
   const numberInputStyle = {
     height: "4rem",
-    boxsizing: "border-box",
+    boxSizing: "border-box", 
     margin: "0 0.5rem",
     fontSize: "1.25rem",
     padding: "0 1rem",
@@ -273,7 +285,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
             <textarea disabled={codeSourceRadioValue !== "csv" || csvCodes.length > 100000} style={{width: "100%", height: "5rem", margin: 0, padding:"0.5rem", fontSize:"1rem", background:csvCodes.length > 100000 ? "rgba(224,204,204,1" : "rgba(255,255,255,0.5"}} onChange={handleCSVChange} value={csvCodes.substring(0,100000)} placeholder="coupon123, coupon321, coupon278" />
             <div>
               <input disabled={codeSourceRadioValue !== "csv"} type="file" accept=".csv,.txt" onChange={handleCsvFileChange} />
-              <span style={{fontSize:"0.75rem"}}>{getText("couponGroupUploadExplanation", language)}</span>
+              <span style={{fontSize:"0.75rem", display:"none"}}>{getText("couponGroupUploadExplanation", language)}</span>
             </div>
             <span>{csvCodes.length === 100000 ? getText("couponGroupTextareaFull", language) : csvCodes.length > 100000 ? `${csvCodes.length - 100000} ${getText("couponGroupTextareaOverflow", language)}`: null}</span>
             <span>{codeTextareaError}</span>
@@ -291,7 +303,19 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
               <input disabled={codeSourceRadioValue !== "generated"} type="text" style={{...numberInputSmallStyle, width:"10rem"}} onChange={handleNewCouponGroupChange} value={newCouponGroup?.codeStem || ""} name="codeStem" />
               <label>{getText("couponGroupStemSuffix", language)}</label>
             </div>
-            <label>{getText("couponGroupGeneratedExamples", language)}</label>
+            <details style={{margin: 0}} open={isDetailsOpen && codeSourceRadioValue === "generated"} onToggle={handleToggleDetails}>
+              <summary className="no-style">{getText("advancedOptions", language)}</summary>
+              <div style={{display:"flex", alignItems:"center"}}>
+                <label>{getText("couponGroupJumbleLength", language)}</label>
+                <input disabled={codeSourceRadioValue !== "generated"} type="number" style={numberInputSmallStyle} onChange={handleNewCouponGroupChange} value={newCouponGroup?.jumbleLength || suggestedJumbleLength} name="jumbleLength" />
+                <label>{getText("couponGroupJumbleLengthSuffix", language)}</label>
+              </div>
+              <div style={{display:"flex", alignItems:"center"}}>
+                <input disabled={codeSourceRadioValue !== "generated"} type="checkbox" id="unambiguous" name="unambiguous" onChange={handleNewCouponGroupChange} checked={newCouponGroup?.isUnambiguous || true} />
+                <label>{getText("couponGroupUnambiguous", language)}</label>
+              </div>
+            </details>
+            <label style={{display:"flex", marginTop: "1rem"}}>{getText("couponGroupGeneratedExamples", language)}</label>
             <ul>
               {exampleCodes.map((code, i) => <li key={i}>{code}</li>)}
             </ul>
@@ -302,7 +326,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
         <div style={{display:"grid", gridTemplateColumns:"33% 33% 34%"}}>
           <div style={{display: "flex", flexDirection:"column"}}>
           <label>{getText("couponType", language)}</label>
-            <select id="couponTypeSelect" onChange={handleNewCouponGroupChange} value={newCouponGroup?.type || 1} name="type" style={{marginTop: 0}}>
+            <select id="couponTypeSelect" onChange={handleNewCouponGroupChange} value={newCouponGroup?.type || 1} name="type" style={{marginTop: 0, height: "4rem"}}>
               <option value={1}>{getText("couponYenDiscount", language)}</option>
               <option value={2}>{getText("couponPercentDiscount", language)}</option>
               <option value={3}>{getText("couponProductDiscount", language)}</option>
@@ -310,11 +334,11 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
           </div>
           <div style={{display: "flex", flexDirection:"column"}}>
             <label>{getText("couponTarget", language)}</label>
-            <input type="number" style={numberInputStyle} onChange={handleNewCouponGroupChange} value={newCouponGroup?.target || 0} name="target" />
+            <input type="number" style={{...numberInputStyle, boxSizing: "border-box"}} onChange={handleNewCouponGroupChange} value={newCouponGroup?.target || 0} name="target" />
           </div>
           <div style={{display: "flex", flexDirection:"column"}}>
             <label>{getText("couponReward", language)}</label>
-            <input type="number" style={numberInputStyle} onChange={handleNewCouponGroupChange} value={newCouponGroup?.reward || 0} name="reward"/>
+            <input type="number" style={{...numberInputStyle, boxSizing: "border-box"}} onChange={handleNewCouponGroupChange} value={newCouponGroup?.reward || 0} name="reward"/>
           </div>
         </div>
         <label style={{display: productSelectDisabled ? "none" : undefined}}>{getText("couponProduct", language)}</label>

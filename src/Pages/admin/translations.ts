@@ -1,8 +1,9 @@
 export type LanguageType = "en" | "jp";
 
 export function getText(id: string | undefined, language: LanguageType): string | undefined {
-    const translation = translations.find((item) => item.id === id);
-    return translation ? translation[language] || id : id;
+    const translationObject = translations.find((item) => item.id === id);
+    const translation = translationObject?.[language] ?? id;
+    return translation;
 };
 
 const translations = [
@@ -23,6 +24,7 @@ const translations = [
     { id: "create", en: "Create", jp: "作成" },
     { id: "search", en: "Search", jp: "検索" },
     { id: "none", en: "None", jp: "なし" },
+    { id: "advancedOptions", en: "Advanced options ▼", jp: "詳細オプション ▼" },
 
     { id: "key", en: "Key", jp: "キー" },
     { id: "customerKey", en: "Customer key", jp: "顧客キー" },
@@ -178,6 +180,9 @@ const translations = [
     { id: "couponGroupStemSuffix", en: "in all coupon codes", jp: "という文字を含めます。" },
     { id: "couponGroupStemBefore", en: "▼ beginning", jp: "▼ 先頭に" },
     { id: "couponGroupStemAfter", en: "▼ end", jp: "▼ 末尾に" },
+    { id: "couponGroupJumbleLength", en: "Include", jp: "" },
+    { id: "couponGroupJumbleLengthSuffix", en: "characters of random letters and numbers", jp: "文字のランダムな文字と数字を含めます。" },
+    { id: "couponGroupUnambiguous", en: "Avoid ambiguous characters (e.g.: 1, I, l, 0, O)", jp: "曖昧な文字を避ける (1, I, l, 0, O など)" },
     { id: "couponGroupGeneratedExamples", en: "Example coupon codes:", jp: "クーポンコードの例:" },
     
 ];
