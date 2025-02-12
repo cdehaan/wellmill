@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AdminDataType } from "../../types";
 import { LanguageType, getText } from "./translations";
+import { text } from "stream/consumers";
 
 type CouponGroupsProps = {
   adminData: AdminDataType | null;
@@ -28,22 +29,22 @@ const defaultCouponGroup: CouponGroupFields = {
   quantity: 10,
   codeStem: "WMCoupon-",
   isCodePrefixed: true,
-  jumbleLength: 0,
+  jumbleLength: 5,
   isUnambiguous: true,
   type: 1,
-  target: 0,
-  reward: 0,
+  target: 100,
+  reward: 10,
   maxUses: 1,
 };
 
-type CouponGroupFieldKey = keyof CouponGroupFields;
+const supportManualCodeEntry = false;
 
 //const token = window.location.search ? new URLSearchParams(window.location.search).get('token') || "" : localStorage.getItem('token') || "";
 
 export default function CouponGroups({ adminData, loadAdminData, language }: CouponGroupsProps) {
   const [showAddCouponGroup, setShowAddCouponGroup] = useState<boolean>(false);   
   const [newCouponGroup, setNewCouponGroup] = useState<CouponGroupFields>(defaultCouponGroup);
-  const [codeSourceRadioValue, setCodeSourceRadioValue] = useState<string>("csv");
+  const [codeSourceRadioValue, setCodeSourceRadioValue] = useState<string>("generated"); // old value: "csv"
   const [csvCodes, setCsvCodes] = useState<string>("");
   const [quantityMemory, setQuantityMemory] = useState<number>(1);
 
@@ -68,16 +69,43 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
 
   if (!couponGroups || !products) return <span>Loading coupon groups and products...</span>;
 
+
+  // This accepts a new value for any field in newCouponGroup
+  // If the field is "quantity", it will also update the jumbleLength field
+  // If the field needs to be a number, it is converted to a number
+  const numberValues = ["productKey", "quantity", "jumbleLength", "type", "target", "reward", "maxUses"];
   function handleNewCouponGroupChange(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-    const key = event.target.name as CouponGroupFieldKey;
-    const value = event.target.value;
+    const key = event.target.name as keyof CouponGroupFields;
+    let value: string | number = event.target.value;
     console.log(`Setting ${key} to ${value}`);
-    if (newCouponGroup) {
-      setNewCouponGroup({...newCouponGroup, [key]: value});
+    if (key === "quantity") {
+      const couponQuantity = parseInt(value);
+      if (!Number.isInteger(couponQuantity) || couponQuantity < 1) {
+        console.log("Invalid quantity");
+        return;
+      }
+      const minimumJumbleLength = calculateMinimumJumbleLength(couponQuantity);
+      if (newCouponGroup) {
+        setNewCouponGroup({...newCouponGroup, quantity: couponQuantity, jumbleLength: Math.max(newCouponGroup.jumbleLength || 5, minimumJumbleLength)});
+      } else {
+        setNewCouponGroup({...defaultCouponGroup, quantity: couponQuantity, jumbleLength: minimumJumbleLength});
+      }
     } else {
-      setNewCouponGroup({...defaultCouponGroup, [key]: value});
+      if (numberValues.includes(key)) {
+        value = Number(value);
+        if (isNaN(value)) {
+          console.log("Invalid number");
+          return;
+        }
+      }
+      if (newCouponGroup) {
+        setNewCouponGroup({...newCouponGroup, [key]: value});
+      } else {
+        setNewCouponGroup({...defaultCouponGroup, [key]: value});
+      }  
     }
   }
+
 
   function handleRadioChange(event: React.ChangeEvent<HTMLInputElement>) {
     setCodeSourceRadioValue(event.target.value);
@@ -194,64 +222,100 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
     <button onClick={() => setShowAddCouponGroup(true)}>{getText("addCouponGroup", language)}</button>
   );
 
-  const requiredCombinations = ((newCouponGroup?.quantity || 1) * ((newCouponGroup?.quantity || 1) - 1)) / (2 * 0.01);
-  const suggestedJumbleLength = Math.max(5, Math.ceil(Math.log(requiredCombinations) / Math.log(56)));
+  const minimumJumbleLength = calculateMinimumJumbleLength(newCouponGroup.quantity);
   const exampleCodes = Array.from({length: 3}, (_, i) => {
-    const code = `${newCouponGroup.isCodePrefixed ? newCouponGroup.codeStem : ""}${"a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9".substring(i*6, suggestedJumbleLength+i*6)}${newCouponGroup.isCodePrefixed ? "" : newCouponGroup.codeStem}`;
+    const code = `${newCouponGroup.isCodePrefixed ? newCouponGroup.codeStem : ""}${"a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9".substring(i*6, (Number(newCouponGroup?.jumbleLength) || 5)+i*6)}${newCouponGroup.isCodePrefixed ? "" : newCouponGroup.codeStem}`;
     return code;
   });
 
   const csvCouponQuantity = csvCodes ? csvCodes.split(',').map(code => code.trim()).filter(code => code.length > 0).length : 0;
   const productSelectDisabled = parseInt((document.getElementById("couponTypeSelect") as HTMLInputElement)?.value ?? 0) !== 3;
 
-  const numberInputStyle = {
-    height: "4rem",
-    boxSizing: "border-box", 
-    margin: "0 0.5rem",
-    fontSize: "1.25rem",
-    padding: "0 1rem",
-    backgroundColor: "#fff",
-    borderRadius: "0.5rem",
-    border: "1px solid #888",
+  let couponDescription = "";
+  switch (newCouponGroup.type) {
+    case 1:
+      couponDescription =
+        language === "en" ? `If the customer spends at least ¥${newCouponGroup.target}, they will get a discount of ¥${newCouponGroup.reward}.` :
+        language === "jp" ? `顧客が${newCouponGroup.target}円以上購入すると、${newCouponGroup.reward}円の割引が受けられます。` :
+        "Unknown language";
+      break;
+    case 2:
+      couponDescription =
+        language === "en" ? `If the customer spends at least ¥${newCouponGroup.target}, they will get a discount of ${newCouponGroup.reward}%.` :
+        language === "jp" ? `顧客が${newCouponGroup.target}円以上購入すると、${newCouponGroup.reward}%の割引が受けられます。` :
+        "Unknown language";
+      break;
+    case 3:
+      couponDescription =
+        language === "en" ? `If the customer buys at least ${newCouponGroup.target} of product [${products.find(product => product.productKey === newCouponGroup.productKey)?.title || " ? "}], they will get a discount of ¥${newCouponGroup.reward}.` :
+        language === "jp" ? `顧客が「${products.find(product => product.productKey === newCouponGroup.productKey)?.title || " ? "}」を${newCouponGroup.target}個以上購入すると、${newCouponGroup.reward}円の割引が受けられます。` :
+        "Unknown language";
+      break;
+    case 5:
+      couponDescription =
+        language === "en" ? `For the ${newCouponGroup.target} most expensive products of any type that the customer buys, they will get a discount of ${newCouponGroup.reward}% off those items.` :
+        language === "jp" ? `顧客が購入する商品の中で、最も高価な${newCouponGroup.target}個の商品に対して${newCouponGroup.reward}%の割引が適用されます。` :
+        "Unknown language";
+      break;
+    default:
+      couponDescription = "Unknown coupon type";
   }
-  const numberInputSmallStyle = {
-    width: "4rem",
-    backgroundColor: "#fff",
-    borderRadius: "0.5rem",
-    border: "1px solid #888",
-    padding: "0.2rem",
-    fontSize: "1.25rem",
-    margin: "0 0.5rem",
-  }
-  const questionDivStyle = {
-    display: "flex",
-    alignItems: "center",
-    padding: "0.5rem 0",
-    borderBottom: "1px dotted #888",
-  }
-  const questionLabelStyle = {
-    minWidth: "8rem",
-  }
+
+  const style = {
+    numberInput: {
+      height: "4rem",
+      boxSizing: "border-box", 
+      margin: "0 0.5rem",
+      fontSize: "1.25rem",
+      padding: "0 1rem",
+      backgroundColor: "#fff",
+      borderRadius: "0.5rem",
+      border: "1px solid #888",
+    }, 
+    numberInputSmall: {
+      width: "4rem",
+      height: "2rem",
+      backgroundColor: "#fff",
+      borderRadius: "0.5rem",
+      border: "1px solid #888",
+      padding: "0 0.2rem",
+      fontSize: "1.25rem",
+      margin: "0 0.5rem",
+    }, 
+    questionDiv: {
+      display: "flex",
+      alignItems: "center",
+      padding: "0.5rem 0",
+      borderBottom: "1px dotted #888",
+    }, 
+    questionLabel: {
+      minWidth: "8rem",
+    }, 
+    couponFunctionalityHeader: {
+      fontSize: "1rem",
+      padding: "0 1rem",
+    }
+  };
 
   const addCouponGroupModal = (
-    <div style={{position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", backgroundColor: "rgba(0,0,0,0.5)", zIndex: 100}}>
-      <div style={{display:"flex", flexDirection:"column", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", maxHeight:"90%", overflow:"scroll", backgroundColor: "#fff", padding: "1rem", borderRadius: "0.5rem"}}>
+    <div style={{position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", backgroundColor: "rgba(0,0,0,0.80)", zIndex: 100}}>
+      <div style={{display:"flex", flexDirection:"column", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", height:"90%", width:"50%", overflow:"scroll", backgroundColor: "#fff", padding: "1rem", borderRadius: "0.5rem"}}>
         <h3>{getText("addCouponGroup", language)}</h3>
 
-        <div style={questionDivStyle}>
-          <label style={questionLabelStyle}>{getText("couponGroupName", language)}</label>
-          <input type="text" style={{...numberInputSmallStyle, width:"10rem"}} onChange={handleNewCouponGroupChange} value={newCouponGroup?.name || ""} name="name" />
+        <div style={style.questionDiv}>
+          <label style={style.questionLabel}>{getText("couponGroupName", language)}</label>
+          <input type="text" style={{...style.numberInputSmall, width:"10rem"}} onChange={handleNewCouponGroupChange} value={newCouponGroup?.name || ""} name="name" />
           <span style={{fontSize: "0.75rem"}}>{getText("couponGroupNameRules", language)}</span>
         </div>
 
-        <div style={questionDivStyle}>
-          <label style={questionLabelStyle}>{getText("couponGroupQuantityPrefix", language)}</label>
-          <input type="number" style={numberInputSmallStyle} onChange={handleNewCouponGroupChange} value={newCouponGroup?.quantity || 1} name="quantity" />
+        <div style={style.questionDiv}>
+          <label style={style.questionLabel}>{getText("couponGroupQuantityPrefix", language)}</label>
+          <input type="number" style={{...style.numberInputSmall, width:"8rem"}} onChange={handleNewCouponGroupChange} value={newCouponGroup?.quantity || 1} name="quantity" />
           <label>{getText("couponGroupQuantitySuffix", language)}</label>
         </div>
 
-        <div style={questionDivStyle}>
-          <label style={questionLabelStyle}>{getText("couponGroupMaxUsesPrefix", language)}</label>
+        <div style={style.questionDiv}>
+          <label style={style.questionLabel}>{getText("couponGroupMaxUsesPrefix", language)}</label>
           <div style={{display: "flex", flexDirection:"column", flexGrow: 1}}>
             <div style={{padding: "0.25rem", background: newCouponGroup.maxUses === null ? "#ccc" : "#fff", color: newCouponGroup.maxUses === null ? "#888" : "#000"}}>
               <input type="radio" id="limitedUses" name="couponUsage" value="limited" defaultChecked onClick={() => {
@@ -261,7 +325,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
                   });
                 }
               }} style={{ marginRight: '0.5rem' }} />
-              <input type="number" id="maxUses" disabled={newCouponGroup.maxUses === null} style={numberInputSmallStyle} onChange={handleNewCouponGroupChange} value={newCouponGroup?.maxUses || quantityMemory} name="maxUses" />
+              <input type="number" id="maxUses" disabled={newCouponGroup.maxUses === null} style={style.numberInputSmall} onChange={handleNewCouponGroupChange} value={newCouponGroup?.maxUses || quantityMemory} name="maxUses" />
               <label>{getText("couponGroupMaxUsesSuffix", language)}</label>
             </div>
             <div style={{padding: "0.25rem", background: newCouponGroup.maxUses === null ? "#fff" : "#ccc", color: newCouponGroup.maxUses === null ? "#000" : "#888"}}>
@@ -271,10 +335,10 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
           </div>
         </div>
 
-        <div style={{...questionDivStyle, flexDirection:"column", alignItems: "start", gap:"1rem", width: "100%"}}>
-          <label>{getText("couponGroupCodeSource", language)}</label>
+        <div style={{...style.questionDiv, flexDirection:"column", alignItems: "start", gap:"1rem", width: "100%"}}>
+          <label style={{display: supportManualCodeEntry ? undefined : "none"}}>{getText("couponGroupCodeSource", language)}</label>
 
-          <div style={{width:"100%", padding: "0.5rem 0", background: codeSourceRadioValue === "csv" ? "#fff": "#ccc", color: codeSourceRadioValue === "csv" ? "#000": "#888" }}>
+          <div style={{display: supportManualCodeEntry ? undefined : "none", width:"100%", padding: "0.5rem 0", background: codeSourceRadioValue === "csv" ? "#fff": "#ccc", color: codeSourceRadioValue === "csv" ? "#000": "#888" }}>
             <div style={{display:"flex", justifyContent: "space-between"}}>
               <div>
                 <input type="radio" id="csv" name="codeSource" value="csv" onChange={handleRadioChange} style={{ marginRight: '0.5rem' }} defaultChecked />
@@ -292,23 +356,24 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
           </div>
 
           <div style={{width:"100%", padding: "0.5rem", background: codeSourceRadioValue === "generated" ? "#fff": "#ccc", color: codeSourceRadioValue === "generated" ? "#000": "#888" }}>
-            <input type="radio" id="generated" name="codeSource" value="generated" onChange={handleRadioChange} style={{ marginRight: '0.5rem' }} />
-            <label>{getText("couponGroupCodesGenerated", language)}</label>
+            <input type="radio" id="generated" name="codeSource" value="generated" onChange={handleRadioChange} style={{display: supportManualCodeEntry ? undefined : "none", marginRight: '0.5rem' }} />
+            <label style={{display: supportManualCodeEntry ? undefined : "none"}}>{getText("couponGroupCodesGenerated", language)}</label>
             <div style={{display:"flex", alignItems:"center"}}>
               <label>{getText("couponGroupStemPrefix", language)}</label>
-              <select disabled={codeSourceRadioValue !== "generated"} onChange={handleStemLocationChange} style={{padding:"0.5rem", width:"unset", fontSize:"unset", margin: 0, marginLeft: "0.5rem", color: codeSourceRadioValue === "generated" ? "#000": "#888" }}>
+              <select disabled={codeSourceRadioValue !== "generated"} onChange={handleStemLocationChange} style={{padding:"0 0.5rem", width:"unset", height: "2rem", fontSize:"unset", margin: 0, marginLeft: "0.5rem", color: codeSourceRadioValue === "generated" ? "#000": "#888" }}>
                 <option value="before">{getText("couponGroupStemBefore", language)}</option>
                 <option value="after">{getText("couponGroupStemAfter", language)}</option>
               </select>
-              <input disabled={codeSourceRadioValue !== "generated"} type="text" style={{...numberInputSmallStyle, width:"10rem"}} onChange={handleNewCouponGroupChange} value={newCouponGroup?.codeStem || ""} name="codeStem" />
+              <input disabled={codeSourceRadioValue !== "generated"} type="text" style={{...style.numberInputSmall, width:"10rem"}} onChange={handleNewCouponGroupChange} value={newCouponGroup?.codeStem || ""} name="codeStem" />
               <label>{getText("couponGroupStemSuffix", language)}</label>
             </div>
             <details style={{margin: 0}} open={isDetailsOpen && codeSourceRadioValue === "generated"} onToggle={handleToggleDetails}>
               <summary className="no-style">{getText("advancedOptions", language)}</summary>
               <div style={{display:"flex", alignItems:"center"}}>
                 <label>{getText("couponGroupJumbleLength", language)}</label>
-                <input disabled={codeSourceRadioValue !== "generated"} type="number" style={numberInputSmallStyle} onChange={handleNewCouponGroupChange} value={newCouponGroup?.jumbleLength || suggestedJumbleLength} name="jumbleLength" />
+                <input disabled={codeSourceRadioValue !== "generated"} type="number" min={minimumJumbleLength} style={style.numberInputSmall} onChange={handleNewCouponGroupChange} value={newCouponGroup?.jumbleLength || minimumJumbleLength} name="jumbleLength" />
                 <label>{getText("couponGroupJumbleLengthSuffix", language)}</label>
+                <label>Min: {minimumJumbleLength}</label>
               </div>
               <div style={{display:"flex", alignItems:"center"}}>
                 <input disabled={codeSourceRadioValue !== "generated"} type="checkbox" id="unambiguous" name="unambiguous" onChange={handleNewCouponGroupChange} checked={newCouponGroup?.isUnambiguous || true} />
@@ -325,27 +390,31 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
 
         <div style={{display:"grid", gridTemplateColumns:"33% 33% 34%"}}>
           <div style={{display: "flex", flexDirection:"column"}}>
-          <label>{getText("couponType", language)}</label>
+          <label style={style.couponFunctionalityHeader}>{getText("couponType", language)}</label>
             <select id="couponTypeSelect" onChange={handleNewCouponGroupChange} value={newCouponGroup?.type || 1} name="type" style={{marginTop: 0, height: "4rem"}}>
               <option value={1}>{getText("couponYenDiscount", language)}</option>
               <option value={2}>{getText("couponPercentDiscount", language)}</option>
               <option value={3}>{getText("couponProductDiscount", language)}</option>
+              <option value={5}>{getText("couponProductPercentDiscount", language)}</option>
             </select>
           </div>
           <div style={{display: "flex", flexDirection:"column"}}>
             <label>{getText("couponTarget", language)}</label>
-            <input type="number" style={{...numberInputStyle, boxSizing: "border-box"}} onChange={handleNewCouponGroupChange} value={newCouponGroup?.target || 0} name="target" />
+            <input type="number" style={{...style.numberInput, boxSizing: "border-box"}} onChange={handleNewCouponGroupChange} value={newCouponGroup?.target || 0} name="target" />
           </div>
           <div style={{display: "flex", flexDirection:"column"}}>
             <label>{getText("couponReward", language)}</label>
-            <input type="number" style={{...numberInputStyle, boxSizing: "border-box"}} onChange={handleNewCouponGroupChange} value={newCouponGroup?.reward || 0} name="reward"/>
+            <input type="number" style={{...style.numberInput, boxSizing: "border-box"}} onChange={handleNewCouponGroupChange} value={newCouponGroup?.reward || 0} name="reward"/>
           </div>
         </div>
         <label style={{display: productSelectDisabled ? "none" : undefined}}>{getText("couponProduct", language)}</label>
         <select disabled={productSelectDisabled} onChange={handleNewCouponGroupChange} value={newCouponGroup?.productKey || ""} name="productKey" style={{display: productSelectDisabled ? "none" : undefined, marginTop: 0, background: productSelectDisabled ? "#ccc" : "#fff"}}>
+          <option value={0}>{getText("selectProduct", language)}</option>
           {products.map((product) => <option key={product.productKey} value={product.productKey}>{product.title}</option>)}
         </select>
-        <button onClick={() => {setShowAddCouponGroup(false)}}>{getText("cancel", language)}</button>
+        <span style={{textDecoration: "underline"}}>{getText("couponDescriptionHeader", language)}</span>
+        <span style={{borderBottom: "1px dotted #888"}}>{couponDescription}</span>
+        <button onClick={() => {setNewCouponGroup(defaultCouponGroup); setShowAddCouponGroup(false)}}>{getText("cancel", language)}</button>
       </div>
     </div>
   );
@@ -360,3 +429,14 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
     </div>
   );
 }
+
+const calculateMinimumJumbleLength = (quantity: number) => {
+  quantity = Math.max(1, quantity);
+  if (!Number.isInteger(quantity)) {
+    return 5;
+  }
+  const requiredCombinations = ((quantity) * ((quantity) - 1)) / (2 * 0.01);
+  const minimumJumbleLength = Math.max(5, Math.ceil(Math.log(requiredCombinations) / Math.log(56)));
+  return minimumJumbleLength;
+}
+

@@ -16,11 +16,11 @@ const GTMHead = () => {
       <meta
         http-equiv="Content-Security-Policy"
         content={`
-          default-src 'self' https://zipcloud.ibsnet.co.jp https://*.google.com https://googleads.g.doubleclick.net; 
+          default-src 'self' https://zipcloud.ibsnet.co.jp https://*.google.com https://googleads.g.doubleclick.net https://*.well-mill.com; 
           script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.googletagmanager.com https://to.reprocell.co.jp https://*.clarity.ms https://connect.facebook.net https://*.google-analytics.com https://*.google.com/pagead https://googleads.g.doubleclick.net https://*.facebook.com https://*.google.com/pagead https://*.googleadservices.com;
           style-src 'self' 'unsafe-inline'; 
           frame-src https://js.stripe.com; 
-          connect-src 'self' https://zipcloud.ibsnet.co.jp https://*.googletagmanager.com https://*.google-analytics.com https://*.clarity.ms;
+          connect-src 'self' https://zipcloud.ibsnet.co.jp https://*.googletagmanager.com https://*.google-analytics.com https://*.clarity.ms https://*.well-mill.com;
           img-src 'self' https://*.google.com https://*.clarity.ms; https://googleads.g.doubleclick.net https://www.facebook.com;
           `}
         />

@@ -127,6 +127,7 @@ const translations = [
     { id: "price", en: "Price", jp: "価格" },
     { id: "taxRate", en: "Tax rate", jp: "税率" },
     { id: "discount", en: "Discount", jp: "割引率" },
+    { id: "selectProduct", en: "Select product", jp: "商品を選択" },
 
     { id: "deleteProduct", en: "Delete product", jp: "商品を削除" },
     { id: "confirmDeleteProduct", en: "Are you sure you want to delete this product?", jp: "この商品を削除してもよろしいですか？" },
@@ -156,7 +157,9 @@ const translations = [
 
     { id: "couponYenDiscount", en: "▼ ~~¥ Off", jp: "▼ ~~¥ 割引" },
     { id: "couponPercentDiscount", en: "▼ ~~% Off", jp: "▼ ~~% 割引" },
-    { id: "couponProductDiscount", en: "▼ Product Discount", jp: "▼ 製品割引" },
+    { id: "couponProductDiscount", en: "▼ Product Discount", jp: "▼ 製品 ~~¥ 割引" },
+    { id: "couponProductYenDiscount", en: "▼ Product ~~¥ Off", jp: "▼ 製品 ~~¥ 割引" }, // not used
+    { id: "couponProductPercentDiscount", en: "▼ Product ~~% Off", jp: "▼ 製品 ~~% 割引" },
 
     { id: "couponExplanation", en: "Coupon Explanation", jp: "クーポン説明" },
 
@@ -184,6 +187,7 @@ const translations = [
     { id: "couponGroupJumbleLengthSuffix", en: "characters of random letters and numbers", jp: "文字のランダムな文字と数字を含めます。" },
     { id: "couponGroupUnambiguous", en: "Avoid ambiguous characters (e.g.: 1, I, l, 0, O)", jp: "曖昧な文字を避ける (1, I, l, 0, O など)" },
     { id: "couponGroupGeneratedExamples", en: "Example coupon codes:", jp: "クーポンコードの例:" },
+    { id: "couponDescriptionHeader", en: "This coupon will act as follows:", jp: "このクーポンは以下のように機能します:" },
     
 ];
 
