@@ -20,6 +20,8 @@ let fetch;
 (async () => { fetch = (await import('node-fetch')).default; })();
 
 const sgMail = require('@sendgrid/mail');
+//const { numberToBaseString, calculateMinimumJumbleLength } = require('./utils/calculations');
+//const { authenticate } = require('./utils/auth');
 sgMail.setApiKey(process.env.SENDGRID_NODE_API_KEY)
 
 const app = express();
@@ -697,6 +699,9 @@ app.post('/adminCouponGroupCreate', async (req, res) => {
   const maxUses = newCouponGroupSpecs.maxUses === undefined ? undefined : Number(newCouponGroupSpecs.maxUses);
   if(isNaN(maxUses) || maxUses <= 0) { return res.status(400).send("Malformed maxUses"); }
 
+  const minimumJumbleLength = 5; //calculateMinimumJumbleLength(couponQuantity);
+  if(jumbleLength < minimumJumbleLength) { return res.status(400).send("Jumble length too short for coupon quantity"); }
+
   query = "INSERT INTO couponGroup (name, codeStem, isCodePrefixed, jumbleLength, isUnambiguous, type, target, reward, maxUses) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
   values = [couponGroupName, codeStem, isCodePrefixed, jumbleLength, isUnambiguous, type, target, reward, maxUses];
   let couponGroupKey;
@@ -705,15 +710,15 @@ app.post('/adminCouponGroupCreate', async (req, res) => {
     const [result] = await pool.query(query, values);
     couponGroupKey = result.insertId;
   } catch(error) {
-    console.error('Error creating coupon:', error);
-    return res.status(500).send('Error creating coupon');
+    console.error('Error creating coupon group:', error);
+    return res.status(500).send('Error creating coupon group');
   }
 
   let couponCreationResults = {statusCode: 400, message: "Needed content for list or server creation not found"};
   if(codeArray.length > 0 && type !== undefined && target !== undefined && reward !== undefined && maxUses !== undefined) {
     couponCreationResults = await createCouponsFromList(codeArray, productKey, type, target, reward, maxUses, couponGroupKey);
   } else if(codeStem !== undefined && jumbleLength !== undefined && type !== undefined && target !== undefined && reward !== undefined && maxUses !== undefined) {
-    couponCreationResults = await createCouponsFromStem(codeStem, isCodePrefixed, couponQuantity, jumbleLength, isUnambiguous, productKey, type, target, reward, maxUses, couponGroupKey);
+    couponCreationResults = await createCouponsFromStem(pool, codeStem, isCodePrefixed, couponQuantity, jumbleLength, isUnambiguous, productKey, type, target, reward, maxUses, couponGroupKey);
   }
   return res.status(couponCreationResults.statusCode).send(couponCreationResults.message);
 });
@@ -749,56 +754,126 @@ async function createCouponsFromList(codeArray, productKey, type, target, reward
   }
 }
 
-async function createCouponsFromStem(codeStem, isCodePrefixed, couponQuantity, jumbleLength, isUnambiguous, productKey, type, target, reward, maxUses, couponGroupKey) {
+async function createCouponsFromStem(pool, codeStem, isCodePrefixed, couponQuantity, jumbleLength, isUnambiguous, productKey, type, target, reward, maxUses, couponGroupKey) {
   const unambiguousChars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
   const ambiguousChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const charSet = isUnambiguous ? unambiguousChars : ambiguousChars;
+  const charSetSize = charSet.length;
+
+  const baseLength = 4; // Minimum unique prefix length
+  const totalBaseCodes = Math.pow(charSetSize, baseLength); // 56^4 or 62^4
+
+  if (couponQuantity > totalBaseCodes) {
+    return { statusCode: 400, message: "Coupon quantity exceeds possible unique codes" }
+  }
+
+  const codes = [];
+  const availableIndexes = Array.from({ length: totalBaseCodes }, (_, i) => i);
+
+  // Fisher-Yates shuffle for first `couponQuantity` numbers
+  for (let i = 0; i < couponQuantity; i++) {
+    const j = Math.floor(Math.random() * (totalBaseCodes - i));
+    [availableIndexes[i], availableIndexes[j]] = [availableIndexes[j], availableIndexes[i]];
+  }
+
+  const filePath = path.join(__dirname, 'couponsGroup.csv');
+  const writeStream = fs.createWriteStream(filePath);
 
   try {
-    const generatedCodes = new Set();
-    const couponData = [];
+    const buffer = [];
+    const batchSize = 1000;
+    for (let i = 0; i < couponQuantity; i++) {
+      const num = availableIndexes[i];
+      let baseCode = "1234a"; //numberToBaseString(num, charSet, baseLength);
+  
+      // Extend code if `jumbleLength` > baseLength
+      while (baseCode.length < jumbleLength) {
+          baseCode += charSet[Math.floor(Math.random() * charSetSize)];
+      }
 
-    // make twice as many codes as needed to account for duplicates
-    while (couponData.length < couponQuantity * 2) {
-      const currentJumble = Array.from({ length: jumbleLength }, () => charSet[Math.floor(Math.random() * charSet.length)]).join('');
-      const currentCode = isCodePrefixed ? codeStem + currentJumble : currentJumble + codeStem;
+      const finalCode = isCodePrefixed ? codeStem + baseCode : baseCode + codeStem;
+      const hash = await sha1(finalCode);
+      buffer.push([currentCode, hash, productKey, type, target, reward, maxUses, couponGroupKey]);
 
-      // If code has already been generated, skip it
-      if (generatedCodes.has(currentCode)) continue;
-
-      generatedCodes.add(currentCode);
-      const hash = await sha1(currentCode);
-      couponData.push([currentCode, hash, productKey, type, target, reward, maxUses, couponGroupKey]);
+      if (buffer.length >= batchSize) {
+        writeStream.write(buffer.join('\n') + '\n');
+        buffer.length = 0;
+      }
     }
 
-    const checkQuery = 'SELECT code FROM coupon WHERE code IN (?)';
-    const [existingCoupons] = await pool.query(checkQuery, [[...generatedCodes]]);
-    const existingCodes = new Set(existingCoupons.map(row => row.code));
-
-    // Filter couponData to remove codes that already exist in the database
-    const unusedCouponData = couponData.filter(([code]) => !existingCodes.has(code));
-
-    // Trim filteredCouponData to match the desired couponQuantity
-    const finalCouponData = unusedCouponData.slice(0, couponQuantity);
-
-    if (finalCouponData.length < couponQuantity) {
-      console.warn('Warning: More than 50% of generated codes were duplicates');
+    // push any remaining buffer contents to the file
+    if (buffer.length > 0) {
+      writeStream.write(buffer.join('\n') + '\n');
+      buffer.length = 0;
     }
 
-    // Construct the bulk INSERT query
-    const query = `
-      INSERT INTO coupon (code, hash, productKey, type, target, reward, maxUses, couponGroupKey) 
-      VALUES ?`;
+    writeStream.end();
 
-    // Use pool.query once to insert all rows at once
-    await pool.query(query, [finalCouponData]);
-    console.log('Coupons created from stem successfully');
-    return { statusCode: 200 }
+    return new Promise((resolve, reject) => {
+      writeStream.on('finish', async () => {
+        console.log(`CSV file created: ${filePath}`);
+
+        // Insert into MySQL using LOAD DATA INFILE
+        try {
+          const connection = await pool.getConnection();
+          const query = `
+            LOAD DATA INFILE ?
+            INTO TABLE coupon
+            FIELDS TERMINATED BY ','
+            LINES TERMINATED BY '\n'
+            (code, hash, productKey, type, target, reward, maxUses, couponGroupKey);
+          `;
+
+          await connection.query(query, [filePath]);
+          connection.release();
+          console.log('Coupons successfully inserted into MySQL');
+          resolve({ statusCode: 200 });
+        } catch (error) {
+          console.error('Error loading data into MySQL:', error);
+          reject({ statusCode: 500, message: "Error loading data into MySQL" });
+        }
+      });
+
+      writeStream.on('error', (error) => {
+        console.error('Error writing file:', error);
+        reject({ statusCode: 500, message: "Error writing file" });
+      });
+    });
   } catch (error) {
     console.error('Error creating coupons:', error);
     return { statusCode: 500, message: "Error creating coupons from stem"}
   }
 }
+
+app.post('/adminCouponGroupDelete', async (req, res) => {
+  return res.status(500).send('Not implemented');
+//  const { authenticated, error, status, stageSubdomain } = authenticate(req);
+//  if (!authenticated) { return res.status(status).send(error); }
+//  const couponGroupKey = Number(req.body.data.couponGroupKey);
+//  if(isNaN(couponGroupKey) || couponGroupKey <= 0 || !Number.isInteger(couponGroupKey)) { return res.status(400).send("Malformed couponGroupKey"); }
+//
+//  // delete all coupons in table "coupon" with couponGroupKey
+//  let query = "DELETE FROM coupon WHERE couponGroupKey = ?";
+//  let values = [couponGroupKey];
+//  try {
+//    await pool.query(query, values);
+//  } catch(error) {
+//    console.error('Error deleting coupons:', error);
+//    return res.status(500).send('Error deleting coupons');
+//  }
+//
+//  // delete coupon group with couponGroupKey in table couponGroup
+//  query = "DELETE FROM couponGroup WHERE couponGroupKey = ?";
+//  values = [couponGroupKey];
+//  try {
+//    await pool.query(query, values);
+//  } catch(error) {
+//    console.error('Error deleting coupon group:', error);
+//    return res.status(500).send('Error deleting coupon group');
+//  }
+//
+//  return res.json({ success: true });
+});
 
 app.post('/adminProductCreate', async (req, res) => {
   const subdomains = req.subdomains;
