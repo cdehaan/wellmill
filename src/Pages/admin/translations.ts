@@ -19,12 +19,14 @@ const translations = [
     { id: "cancel", en: "Cancel", jp: "キャンセル" },
     { id: "delete", en: "Delete", jp: "削除" },
     { id: "search", en: "Search", jp: "検索" },
+    { id: "edit", en: "Edit", jp: "編集" },
     { id: "save", en: "Save", jp: "保存" },
     { id: "upload", en: "Upload", jp: "アップロード" },
     { id: "create", en: "Create", jp: "作成" },
     { id: "search", en: "Search", jp: "検索" },
     { id: "none", en: "None", jp: "なし" },
     { id: "advancedOptions", en: "Advanced options ▼", jp: "詳細オプション ▼" },
+    { id: "actions", en: "Actions", jp: "アクション" },
 
     { id: "key", en: "Key", jp: "キー" },
     { id: "customerKey", en: "Customer key", jp: "顧客キー" },
@@ -188,7 +190,21 @@ const translations = [
     { id: "couponGroupUnambiguous", en: "Avoid ambiguous characters (e.g.: 1, I, l, 0, O)", jp: "曖昧な文字を避ける (1, I, l, 0, O など)" },
     { id: "couponGroupGeneratedExamples", en: "Example coupon codes:", jp: "クーポンコードの例:" },
     { id: "couponDescriptionHeader", en: "This coupon will act as follows:", jp: "このクーポンは以下のように機能します:" },
-    
+
+    { id: "totalCoupons", en: "Total coupons", jp: "総クーポン数" },
+    { id: "couponGroupName", en: "Group name", jp: "グループ名" },
+    { id: "couponGroupCodeStem", en: "Code stem", jp: "コードの先頭" },
+    { id: "couponGroupCount", en: "Count", jp: "数" },
+    { id: "couponGroupKey", en: "Key", jp: "キー" },
+    { id: "couponGroupStatus", en: "Status", jp: "ステータス" },
+    { id: "couponGroupActive", en: "Active", jp: "アクティブ" },
+    { id: "couponGroupInactive", en: "Inactive", jp: "非アクティブ" },
+    { id: "couponGroupUseText", en: "Used", jp: "使用" },
+    { id: "couponGroupUseChart", en: "", jp: "" },
+    { id: "addCoupons", en: "Add coupons", jp: "クーポンを追加" },
+    { id: "activateCouponGroup", en: "Activate group", jp: "グループをアクティブにする" },
+    { id: "deactivateCouponGroup", en: "Deactivate group", jp: "グループを非アクティブにする" },
+    { id: "deleteCouponGroup", en: "Delete group", jp: "グループを削除" },
 ];
 
 export default translations;

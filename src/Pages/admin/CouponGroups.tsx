@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { AdminDataType } from "../../types";
 import { LanguageType, getText } from "./translations";
 import { text } from "stream/consumers";
+import CouponUsageChart from "../../Components/CouponUsageChart";
 
 type CouponGroupsProps = {
   adminData: AdminDataType | null;
@@ -294,7 +295,22 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
     couponFunctionalityHeader: {
       fontSize: "1rem",
       padding: "0 1rem",
-    }
+    },
+
+    tableRow: {
+      display: "grid",
+      gridTemplateColumns: "4rem 10rem 10rem 10rem 10rem 10rem 10rem 24rem",
+      borderBottom: "1px solid #ccc",
+      alignItems: "center",
+    },
+    actionSpan: {
+      padding: "0.25rem",
+      margin: "0.5rem 0",
+      border: "1px solid #888",
+      borderRadius: "0.5rem",
+      cursor: "pointer",
+      boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px",
+    },
   };
 
   const addCouponGroupModal = (
@@ -419,13 +435,74 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
     </div>
   );
 
+  const activeGroupElement = (<span style={{color: "#4caf50", fontWeight: "bold"}}>{getText("couponGroupActive",language)}</span>);
+  const inactiveGroupElement = (<span style={{color: "#f44336", fontWeight: "bold"}}>{getText("couponGroupInactive",language)}</span>);
+
+  const totalCoupons = couponGroups.reduce((acc, group) => acc + group.count, 0);
+
+  const couponGroupRows = couponGroups.map((couponGroup, i) => {
+    const couponCount = couponGroup.count;
+    const unusedCount = couponGroup.unusedCount;
+    const usedupCount = couponGroup.usedupCount;
+    const usedCount = couponCount - unusedCount - usedupCount;
+    const active = couponGroup.active; // can be 1 or 0, thanks MySQL
+
+    const groupActions = (
+      <div style={{display: "flex", gap: "0.5rem"}}>
+        <span style={style.actionSpan}>{getText("addCoupons", language)}</span>
+        {active ? <span style={style.actionSpan}>{getText("deactivateCouponGroup", language)}</span> : <span style={style.actionSpan}>{getText("activateCouponGroup", language)}</span>}
+        <span style={style.actionSpan}>{getText("deleteCouponGroup", language)}</span>
+      </div>
+    );
+  
+    const usedText = (
+      <div style={{display: "flex", flexDirection:"column", gap: "0rem"}}>
+        <span style={{color: "#4caf50", fontWeight: "bold"}}>{getText("Unused", language)}: {unusedCount}</span>
+        <span style={{color: "#ff9800", fontWeight: "bold"}}>{getText("Used", language)}: {usedCount}</span>
+        <span style={{color: "#f44336", fontWeight: "bold"}}>{getText("UsedUp", language)}: {usedupCount}</span>
+      </div>
+    )  
+
+    return (
+      <div key={i} style={style.tableRow}>
+        <span>{couponGroup.couponGroupKey}</span>
+        <span>{couponGroup.active ? activeGroupElement : inactiveGroupElement}</span>
+        <span>{couponGroup.name}</span>
+        <span>{couponGroup.codeStem}</span>
+        <span>{couponCount}</span>
+        {usedText}
+        <CouponUsageChart total={couponCount} unused={unusedCount} usedup={usedupCount} scale={0.5} />
+        {groupActions}
+      </div>
+    );
+  });
+
+  const couponGroupTable = (
+    <div style={{display: "flex", flexDirection:"column", margin: "1rem 0"}}>
+      <div style={style.tableRow}>
+        <span>{getText("couponGroupKey", language)}</span>
+        <span>{getText("couponGroupStatus", language)}</span>
+        <span>{getText("couponGroupName", language)}</span>
+        <span>{getText("couponGroupCodeStem", language)}</span>
+        <span>{getText("couponGroupCount", language)}</span>
+        <span>{getText("couponGroupUseText", language)}</span>
+        <span>{getText("couponGroupUseChart", language)}</span>
+        <span>{getText("actions", language)}</span>
+      </div>
+      {couponGroupRows}
+    </div>
+  );
+
   return (
-    <div>
+    <div style={{padding: "0 1rem"}}>
       {showAddCouponGroup ? addCouponGroupModal : null}
       <h2>{getText("coupongroups", language)}</h2>
       {language === "jp" ? couponExplanationJp : language === "en" ? couponExplanationEn : "Unknown language"}
       <br />
       {addCouponGroupButton}
+      <br />
+      <span>{getText("totalCoupons", language)}: {totalCoupons}</span>
+      {couponGroupTable}
     </div>
   );
 }

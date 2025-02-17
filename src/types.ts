@@ -120,7 +120,9 @@ export type Coupon = {
 }
 
 export type CouponGroup = {
+    name: string,
     couponGroupKey: number,
+    active: boolean,
     codeStem: string,
     isCodePrefixed: boolean,
     jumbleLength: number,
@@ -129,6 +131,9 @@ export type CouponGroup = {
     target: number,
     reward: number,
     maxUses: number,
+    count: number,
+    unusedCount: number,
+    usedupCount: number,
 }
 //#endregion
 
