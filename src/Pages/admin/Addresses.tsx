@@ -105,7 +105,7 @@ export default function Addresses({ adminData, loadAdminData, language }: Addres
     if(!currentAddress) return;
     currentAddress.prefCode = parseInt(currentAddress?.prefCode?.toString() || "13");
     setCurrentAddressData(currentAddress);
-  }, [currentAddressKey]);
+  }, [currentAddressKey, adminData?.addresses]);
 
   const addresses = adminData?.addresses;
   if (!addresses) return <span>{getText("loadingAddresses", language)}</span>;

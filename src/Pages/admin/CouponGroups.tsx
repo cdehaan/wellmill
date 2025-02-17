@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { AdminDataType } from "../../types";
 import { LanguageType, getText } from "./translations";
-import { text } from "stream/consumers";
 import CouponUsageChart from "../../Components/CouponUsageChart";
 import CallAPI from "../../Utilities/CallAPI";
 

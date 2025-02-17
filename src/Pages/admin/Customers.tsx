@@ -109,7 +109,7 @@ export default function Customers({ adminData, loadAdminData, language }: Custom
     const currentCustomer = adminData?.customers.find(c => c.customerKey === currentCustomerKey);
     if(currentCustomer?.birthday) currentCustomer.birthday = currentCustomer?.birthday?.substring(0,10);
     setCurrentCustomerData(currentCustomer);
-  }, [currentCustomerKey]);
+  }, [currentCustomerKey, adminData?.customers]);
 
   const customers = adminData?.customers;
   if (!customers) return <span>{getText("loading", language)}</span>;

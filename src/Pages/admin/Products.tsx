@@ -56,7 +56,7 @@ export default function Products({ adminData, loadAdminData, language }: Product
   useEffect(() => {
     const currentProduct = adminData?.products.find(prod => prod.productKey === currentProductKey);
     if(currentProduct) setCurrentProductData(currentProduct);
-  }, [currentProductKey]);
+  }, [currentProductKey, adminData?.products]);
 
   const products = adminData?.products;
   //console.log("adminData in Products.tsx");
