@@ -167,7 +167,7 @@ const translations = [
 
     /* Bulk coupons / coupon groups */
     { id: "addCouponGroup", en: "Add bulk coupons", jp: "一括クーポンを追加" },
-    { id: "couponGroupName", en: "Coupon Group name", jp: "一括クーポン名" },
+    { id: "couponGroupName", en: "Group name", jp: "一括クーポン名" },
     { id: "couponGroupNamePlaceholder", en: "Fall", jp: "Fall" },
     { id: "couponGroupNameRules", en: "Only English characters can be used. This won't be seen by the customer.", jp: "英語の文字のみ使用可能。これは顧客には表示されません。" },
     { id: "couponGroupQuantityPrefix", en: "Create", jp: "クーポンを" },
@@ -199,12 +199,17 @@ const translations = [
     { id: "couponGroupStatus", en: "Status", jp: "ステータス" },
     { id: "couponGroupActive", en: "Active", jp: "アクティブ" },
     { id: "couponGroupInactive", en: "Inactive", jp: "非アクティブ" },
-    { id: "couponGroupUseText", en: "Used", jp: "使用" },
+    { id: "couponGroupUseText", en: "Usage statistics", jp: "使用統計" },
     { id: "couponGroupUseChart", en: "", jp: "" },
     { id: "addCoupons", en: "Add coupons", jp: "クーポンを追加" },
     { id: "activateCouponGroup", en: "Activate group", jp: "グループをアクティブにする" },
     { id: "deactivateCouponGroup", en: "Deactivate group", jp: "グループを非アクティブにする" },
     { id: "deleteCouponGroup", en: "Delete group", jp: "グループを削除" },
+    { id: "couponGroupDeleteConfirmation", en: "Are you sure you want to delete this coupon group?", jp: "このクーポングループを削除してもよろしいですか？" },
+    { id: "couponGroupAppendPrompt", en: "Create additional coupons in this group", jp: "このグループに追加のクーポンを作成" },
+    { id: "couponGroupAppendInvalid", en: "Invalid number of coupons to append", jp: "追加するクーポンの数が無効です" },
+    { id: "couponGroupActivateConfirmation", en: "Are you sure you want to activate this coupon group?", jp: "このクーポングループをアクティブにしてもよろしいですか？" },
+    { id: "couponGroupDeactivateConfirmation", en: "Are you sure you want to deactivate this coupon group?", jp: "このクーポングループを非アクティブにしてもよろしいですか？" },
 ];
 
 export default translations;

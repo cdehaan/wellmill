@@ -3,6 +3,7 @@ import { AdminDataType } from "../../types";
 import { LanguageType, getText } from "./translations";
 import { text } from "stream/consumers";
 import CouponUsageChart from "../../Components/CouponUsageChart";
+import CallAPI from "../../Utilities/CallAPI";
 
 type CouponGroupsProps = {
   adminData: AdminDataType | null;
@@ -39,6 +40,7 @@ const defaultCouponGroup: CouponGroupFields = {
 };
 
 const supportManualCodeEntry = false;
+const token = window.location.search ? new URLSearchParams(window.location.search).get('token') || "" : localStorage.getItem('token') || "";
 
 //const token = window.location.search ? new URLSearchParams(window.location.search).get('token') || "" : localStorage.getItem('token') || "";
 
@@ -199,6 +201,81 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
     }
   }
 
+  async function handleCouponAppend(couponGroupKey: number) {
+    // Use window.prompt to ask the user for a number
+    const input = window.prompt(getText("couponGroupAppendPrompt", language), "100");
+
+    // If the user cancels, input will be null
+    if (input === null) {
+      return; // User cancelled the prompt
+    }
+
+    // Convert the input to a number
+    const count = parseInt(input, 10);
+
+    // Validate the input
+    if (isNaN(count)) {
+      window.alert(getText("couponGroupAppendInvalid", language));
+      return;
+    }
+
+    const requestBody = {
+      token: token,
+      couponGroupKey: couponGroupKey,
+      couponQuantity: count,  
+    };
+
+    const responseData = await CallAPI(requestBody, "adminCouponGroupAppend");
+    console.log(responseData);
+    setTimeout(() => {
+      loadAdminData();
+    }, 500);
+  }
+
+
+  async function handleGroupActivate(couponGroupKey: number, activate: boolean) {
+    const confirmed = window.confirm(activate ? getText("couponGroupActivateConfirmation", language) : getText("couponGroupDeactivateConfirmation", language));
+
+    if (!confirmed) {
+      return;
+    }
+
+    const requestBody = {
+      token: token,
+      couponGroupKey: couponGroupKey,
+      activate: activate,
+    };
+
+    const responseData = await CallAPI(requestBody, "adminCouponGroupActivate");
+    console.log(responseData);
+    setTimeout(() => {
+      loadAdminData();
+    }, 500);
+  }
+  
+
+  async function handleCouponDelete(couponGroupKey: number) {
+    // Show a confirmation dialog to the user
+    const confirmed = window.confirm(getText("couponGroupDeleteConfirmation", language));
+    
+    // If the user clicks "Cancel" (i.e., confirmed is false), exit the function
+    if (!confirmed) {
+      return;
+    }
+
+    const requestBody = {
+      token: token,
+      couponGroupKey: couponGroupKey,
+    };
+
+    const responseData = await CallAPI(requestBody, "adminCouponGroupDelete");
+    console.log(responseData);
+    setTimeout(() => {
+      loadAdminData();
+    }, 500);
+  }
+
+
 
   const couponExplanationJp = (
     <div style={{display: "inline-flex", flexDirection:"column", border:"1px solid #888", borderRadius: "0.5rem", padding: "0.5rem", margin: "0.5rem"}}>
@@ -299,7 +376,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
 
     tableRow: {
       display: "grid",
-      gridTemplateColumns: "4rem 10rem 10rem 10rem 10rem 10rem 10rem 24rem",
+      gridTemplateColumns: "4rem 8rem 10rem 10rem 6rem 8rem 8rem 1fr",
       borderBottom: "1px solid #ccc",
       alignItems: "center",
     },
@@ -449,9 +526,9 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
 
     const groupActions = (
       <div style={{display: "flex", gap: "0.5rem"}}>
-        <span style={style.actionSpan}>{getText("addCoupons", language)}</span>
-        {active ? <span style={style.actionSpan}>{getText("deactivateCouponGroup", language)}</span> : <span style={style.actionSpan}>{getText("activateCouponGroup", language)}</span>}
-        <span style={style.actionSpan}>{getText("deleteCouponGroup", language)}</span>
+        <span style={style.actionSpan} onClick={() => {handleCouponAppend(couponGroup.couponGroupKey)}}>{getText("addCoupons", language)}</span>
+        {active ? <span style={style.actionSpan} onClick={() => {handleGroupActivate(couponGroup.couponGroupKey, false)}}>{getText("deactivateCouponGroup", language)}</span> : <span style={style.actionSpan} onClick={() => {handleGroupActivate(couponGroup.couponGroupKey, true)}}>{getText("activateCouponGroup", language)}</span>}
+        <span style={style.actionSpan} onClick={() => {handleCouponDelete(couponGroup.couponGroupKey)}}>{getText("deleteCouponGroup", language)}</span>
       </div>
     );
   
