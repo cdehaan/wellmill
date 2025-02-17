@@ -130,6 +130,7 @@ export type CouponGroup = {
     type: number,
     target: number,
     reward: number,
+    productKey: number | null,
     maxUses: number,
     count: number,
     unusedCount: number,

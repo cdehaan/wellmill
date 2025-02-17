@@ -157,11 +157,11 @@ const translations = [
     { id: "couponReward", en: "Reward", jp: "報酬" },
     { id: "couponCount", en: "Coupons: ", jp: "クーポン: " },
 
-    { id: "couponYenDiscount", en: "▼ ~~¥ Off", jp: "▼ ~~¥ 割引" },
-    { id: "couponPercentDiscount", en: "▼ ~~% Off", jp: "▼ ~~% 割引" },
-    { id: "couponProductDiscount", en: "▼ Product Discount", jp: "▼ 製品 ~~¥ 割引" },
-    { id: "couponProductYenDiscount", en: "▼ Product ~~¥ Off", jp: "▼ 製品 ~~¥ 割引" }, // not used
-    { id: "couponProductPercentDiscount", en: "▼ Product ~~% Off", jp: "▼ 製品 ~~% 割引" },
+    { id: "couponYenDiscount", en: "▼ ~~¥ Off", jp: "▼ ~~¥ 割引" }, // type 1
+    { id: "couponPercentDiscount", en: "▼ ~~% Off", jp: "▼ ~~% 割引" }, // type 2
+    { id: "couponProductDiscount", en: "▼ Product ~~¥ Off", jp: "▼ 製品 ~~¥ 割引" }, // type 3
+    { id: "couponProductYenDiscount", en: "▼ Product ~~¥ Off", jp: "▼ 製品 ~~¥ 割引" }, // type 4 - not used, still in MySQL table
+    { id: "couponProductPercentDiscount", en: "▼ Product ~~% Off", jp: "▼ 製品 ~~% 割引" }, // type 5
 
     { id: "couponExplanation", en: "Coupon Explanation", jp: "クーポン説明" },
 

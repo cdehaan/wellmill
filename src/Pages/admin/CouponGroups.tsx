@@ -8,6 +8,7 @@ import CallAPI from "../../Utilities/CallAPI";
 type CouponGroupsProps = {
   adminData: AdminDataType | null;
   loadAdminData: () => void;
+  isLoading: boolean;
   language: LanguageType;
 };
 
@@ -53,6 +54,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
 
   const [codeTextareaError, setCodeTextareaError] = useState<string>("");
   const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(false);
+  const [updatingGroups, setUpdatingGroups] = useState<number[]>([]);
 
   const couponGroups = adminData?.couponGroups;
   const products = adminData?.products;
@@ -80,7 +82,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
   function handleNewCouponGroupChange(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const key = event.target.name as keyof CouponGroupFields;
     let value: string | number = event.target.value;
-    console.log(`Setting ${key} to ${value}`);
+    //console.log(`Setting ${key} to ${value}`);
     if (key === "quantity") {
       const couponQuantity = parseInt(value);
       if (!Number.isInteger(couponQuantity) || couponQuantity < 1) {
@@ -225,7 +227,9 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
       couponQuantity: count,  
     };
 
+    setUpdatingGroups([...updatingGroups, couponGroupKey]);
     const responseData = await CallAPI(requestBody, "adminCouponGroupAppend");
+    setUpdatingGroups(updatingGroups.filter(key => key !== couponGroupKey));
     console.log(responseData);
     setTimeout(() => {
       loadAdminData();
@@ -246,7 +250,9 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
       activate: activate,
     };
 
+    setUpdatingGroups([...updatingGroups, couponGroupKey]);
     const responseData = await CallAPI(requestBody, "adminCouponGroupActivate");
+    setUpdatingGroups(updatingGroups.filter(key => key !== couponGroupKey));
     console.log(responseData);
     setTimeout(() => {
       loadAdminData();
@@ -268,7 +274,9 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
       couponGroupKey: couponGroupKey,
     };
 
+    setUpdatingGroups([...updatingGroups, couponGroupKey]);
     const responseData = await CallAPI(requestBody, "adminCouponGroupDelete");
+    setUpdatingGroups(updatingGroups.filter(key => key !== couponGroupKey));
     console.log(responseData);
     setTimeout(() => {
       loadAdminData();
@@ -280,18 +288,24 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
   const couponExplanationJp = (
     <div style={{display: "inline-flex", flexDirection:"column", border:"1px solid #888", borderRadius: "0.5rem", padding: "0.5rem", margin: "0.5rem"}}>
       <span style={{fontSize:"1.5rem"}}>クーポンタイプの説明:</span>
-      <div><span> - クーポンタイプ 1: </span><span> 顧客が X 円以上お買い上げの場合、 Y 円割引となります。</span></div>
-      <div><span> - クーポンタイプ 2: </span><span> 顧客が X 円以上お買い上げの場合、 Y %割引となります。</span></div>
-      <div><span> - クーポンタイプ 3: </span><span> 顧客が製品 A を B 個以上購入すると、C 円の割引となります</span></div>
+      <div style={{display: "grid", gridTemplateColumns: "10rem 1fr"}}>
+        <span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>~~¥ 割引: </span><span>{couponTypeDescription(1, "X", "Y", null, "jp")}</span>
+        <span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>~~% 割引: </span><span>{couponTypeDescription(2, "X", "Y", null, "jp")}</span>
+        <span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>製品 ~~¥ 割引: </span><span>{couponTypeDescription(3, "X", "Y", null, "jp")}</span>
+        <span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>製品 ~~% 割引: </span><span>{couponTypeDescription(5, "X", "Y", null, "jp")}</span>
+      </div>
     </div>
   );
 
   const couponExplanationEn = (
     <div style={{display: "inline-flex", flexDirection:"column", border:"1px solid #888", borderRadius: "0.5rem", padding: "0.5rem", margin: "0.5rem"}}>
-      <span style={{fontSize:"1.5rem"}}>Coupon type explanation:</span>
-      <div><span> - Coupon type 1: </span><span> If a customer spends X yen or more, they get a discount of Y yen.</span></div>
-      <div><span> - Coupon type 2: </span><span> If a customer spends X yen or more, they get a discount of Y%.</span></div>
-      <div><span> - Coupon type 3: </span><span> If a customer buys B or more of product A, they get a discount of C yen.</span></div>
+      <span style={{fontSize:"1.5rem"}}>クーポンタイプの説明:</span>
+      <div style={{display: "grid", gridTemplateColumns: "10rem 1fr"}}>
+        <span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>Yen discount: </span><span>{couponTypeDescription(1, "x", "y", null, "en")}</span>
+        <span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>Percent discount: </span><span>{couponTypeDescription(2, "x", "y", null, "en")}</span>
+        <span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>Product discount: </span><span>{couponTypeDescription(3, "x", "y", null, "en")}</span>
+        <span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>Quantity discount: </span><span>{couponTypeDescription(5, "x", "y", null, "en")}</span>
+      </div>
     </div>
   );
 
@@ -309,34 +323,39 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
   const csvCouponQuantity = csvCodes ? csvCodes.split(',').map(code => code.trim()).filter(code => code.length > 0).length : 0;
   const productSelectDisabled = parseInt((document.getElementById("couponTypeSelect") as HTMLInputElement)?.value ?? 0) !== 3;
 
-  let couponDescription = "";
-  switch (newCouponGroup.type) {
-    case 1:
-      couponDescription =
-        language === "en" ? `If the customer spends at least ¥${newCouponGroup.target}, they will get a discount of ¥${newCouponGroup.reward}.` :
-        language === "jp" ? `顧客が${newCouponGroup.target}円以上購入すると、${newCouponGroup.reward}円の割引が受けられます。` :
-        "Unknown language";
-      break;
-    case 2:
-      couponDescription =
-        language === "en" ? `If the customer spends at least ¥${newCouponGroup.target}, they will get a discount of ${newCouponGroup.reward}%.` :
-        language === "jp" ? `顧客が${newCouponGroup.target}円以上購入すると、${newCouponGroup.reward}%の割引が受けられます。` :
-        "Unknown language";
-      break;
-    case 3:
-      couponDescription =
-        language === "en" ? `If the customer buys at least ${newCouponGroup.target} of product [${products.find(product => product.productKey === newCouponGroup.productKey)?.title || " ? "}], they will get a discount of ¥${newCouponGroup.reward}.` :
-        language === "jp" ? `顧客が「${products.find(product => product.productKey === newCouponGroup.productKey)?.title || " ? "}」を${newCouponGroup.target}個以上購入すると、${newCouponGroup.reward}円の割引が受けられます。` :
-        "Unknown language";
-      break;
-    case 5:
-      couponDescription =
-        language === "en" ? `For the ${newCouponGroup.target} most expensive products of any type that the customer buys, they will get a discount of ${newCouponGroup.reward}% off those items.` :
-        language === "jp" ? `顧客が購入する商品の中で、最も高価な${newCouponGroup.target}個の商品に対して${newCouponGroup.reward}%の割引が適用されます。` :
-        "Unknown language";
-      break;
-    default:
-      couponDescription = "Unknown coupon type";
+  const couponDescription = couponTypeDescription(newCouponGroup.type, newCouponGroup.target, newCouponGroup.reward, newCouponGroup.productKey, language);
+
+  function couponTypeDescription(type: number, target: number | string, reward: number | string, productKey: number | null, language: "en" | "jp"): string {
+    let couponDescription = "";
+    switch (type) {
+      case 1:
+        couponDescription =
+          language === "en" ? `If the customer spends at least ¥${target}, they will get a discount of ¥${reward}.` :
+          language === "jp" ? `顧客が${target}円以上購入すると、${reward}円の割引が受けられます。` :
+          "Unknown language";
+        break;
+      case 2:
+        couponDescription =
+          language === "en" ? `If the customer spends at least ¥${target}, they will get a discount of ${reward}%.` :
+          language === "jp" ? `顧客が${target}円以上購入すると、${reward}%の割引が受けられます。` :
+          "Unknown language";
+        break;
+      case 3:
+        couponDescription =
+          language === "en" ? `If the customer buys at least ${target} of product [${products?.find(product => product.productKey === productKey)?.title || " ? "}], they will get a discount of ¥${reward}.` :
+          language === "jp" ? `顧客が「${products?.find(product => product.productKey === productKey)?.title || " (製品) "}」を${target}個以上購入すると、${reward}円の割引が受けられます。` :
+          "Unknown language";
+        break;
+      case 5:
+        couponDescription =
+          language === "en" ? `For the ${target} most expensive products of any type that the customer buys, they will get a discount of ${reward}% off those items.` :
+          language === "jp" ? `顧客が購入する商品の中で、最も高価な${target}個の商品に対して${reward}%の割引が適用されます。` :
+          "Unknown language";
+        break;
+      default:
+        couponDescription = "Unknown coupon type";
+    }
+    return couponDescription;
   }
 
   const style = {
@@ -377,7 +396,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
     tableRow: {
       display: "grid",
       gridTemplateColumns: "4rem 8rem 10rem 10rem 6rem 8rem 8rem 1fr",
-      borderBottom: "1px solid #ccc",
+      borderTop: "1px solid #ccc",
       alignItems: "center",
     },
     actionSpan: {
@@ -541,15 +560,19 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
     )  
 
     return (
-      <div key={i} style={style.tableRow}>
-        <span>{couponGroup.couponGroupKey}</span>
-        <span>{couponGroup.active ? activeGroupElement : inactiveGroupElement}</span>
-        <span>{couponGroup.name}</span>
-        <span>{couponGroup.codeStem}</span>
-        <span>{couponCount}</span>
-        {usedText}
-        <CouponUsageChart total={couponCount} unused={unusedCount} usedup={usedupCount} scale={0.5} />
-        {groupActions}
+      <div key={i} style={{position: "relative"}}>
+        <div style={style.tableRow}>
+          <span>{couponGroup.couponGroupKey}</span>
+          <span>{couponGroup.active ? activeGroupElement : inactiveGroupElement}</span>
+          <span>{couponGroup.name}</span>
+          <span>{couponGroup.codeStem}</span>
+          <span>{couponCount}</span>
+          {usedText}
+          <CouponUsageChart total={couponCount} unused={unusedCount} usedup={usedupCount} scale={0.5} />
+          {groupActions}
+        </div>
+        <span>{couponTypeDescription(couponGroup.type, couponGroup.target, couponGroup.reward, couponGroup.productKey, language)}</span>
+        <div style={{display: updatingGroups.includes(couponGroup.couponGroupKey) ? undefined : "none", position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5"}}></div>
       </div>
     );
   });
@@ -593,4 +616,3 @@ const calculateMinimumJumbleLength = (quantity: number) => {
   const minimumJumbleLength = Math.max(5, Math.ceil(Math.log(requiredCombinations) / Math.log(56)));
   return minimumJumbleLength;
 }
-

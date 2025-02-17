@@ -19,6 +19,7 @@ const registeredEmails = [
 
 export default function Admin() {
   const [adminData, setAdminData] = useState<AdminDataType | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentScreen, setCurrentScreen] = useState<string>("");
   const [language, setLanguage] = useState<LanguageType>("jp"); // en or jp
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -26,7 +27,7 @@ export default function Admin() {
   const [email, setEmail] = useState<string>("");
 
   //function checkAuthentication(email?: string, token?: string) {
-  const checkAuthentication = useCallback((email?: string, token?: string) => {
+  const checkAuthentication = useCallback(async (email?: string, token?: string) => {
     if(!email) {
       email = localStorage.getItem('email') || undefined;
     }
@@ -42,7 +43,9 @@ export default function Admin() {
     if (registeredEmails.includes(email)) {
       setEmail(email);
       setIsAuthenticated(true);
-      loadAdminData(token);
+      setIsLoading(true);
+      await loadAdminData(token);
+      setIsLoading(false);
     } else {
       setIsAuthenticated(false);
     }
@@ -75,26 +78,36 @@ export default function Admin() {
     const dev = false;
 
     if(dev === true as boolean) {
+      setIsLoading(true);
       const response = await fetch('/admin.json');
       if (!response.ok) {
+        setIsLoading(false);
         throw new Error('Network response was not ok');
       }
       const data = await response.json();
-      setAdminData(data);  
+      setAdminData(data);
+      setIsLoading(false);
     } else {
       const credentials = {
         token: token,
-      };  
+      };
+      setIsLoading(true);
       const APIResponse = await CallAPI(credentials, "adminFetch");
-      console.log("APIResponse in Admin");
-      console.log(APIResponse);
+      //console.log("APIResponse in Admin");
+      //console.log(APIResponse);
       if(APIResponse.error) {
         setError(APIResponse.error);
         setIsAuthenticated(false);
+        setIsLoading(false);
         return;
       }
-      if (!APIResponse) return;
-      setAdminData(APIResponse.data);  
+      if (!APIResponse) {
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        return;
+      }
+      setAdminData(APIResponse.data);
+      setIsLoading(false);
     }
   }
 
@@ -118,22 +131,22 @@ export default function Admin() {
       currentElement = dashboard
       break;
     case "Customers":
-      currentElement = <Customers adminData={adminData} loadAdminData={loadAdminData} language={language} />
+      currentElement = <Customers adminData={adminData} loadAdminData={loadAdminData} isLoading={isLoading} language={language} />
       break;
     case "Addresses":
-      currentElement = <Addresses adminData={adminData} loadAdminData={loadAdminData} language={language} />
+      currentElement = <Addresses adminData={adminData} loadAdminData={loadAdminData} isLoading={isLoading} language={language} />
       break;
     case "Products":
-      currentElement = <Products adminData={adminData} loadAdminData={loadAdminData} language={language} />
+      currentElement = <Products adminData={adminData} loadAdminData={loadAdminData} isLoading={isLoading} language={language} />
       break;
     case "Images":
-      currentElement = <Images adminData={adminData} loadAdminData={loadAdminData} language={language} />
+      currentElement = <Images adminData={adminData} loadAdminData={loadAdminData} isLoading={isLoading} language={language} />
       break;
     case "Coupons":
-      currentElement = <Coupons adminData={adminData} loadAdminData={loadAdminData} language={language} />
+      currentElement = <Coupons adminData={adminData} loadAdminData={loadAdminData} isLoading={isLoading} language={language} />
       break;
     case "CouponGroups":
-      currentElement = <CouponGroups adminData={adminData} loadAdminData={loadAdminData} language={language} />
+      currentElement = <CouponGroups adminData={adminData} loadAdminData={loadAdminData} isLoading={isLoading} language={language} />
       break;
     default:
       currentElement = dashboard;
@@ -167,6 +180,7 @@ export default function Admin() {
       <div style={{height: "100%", overflowY: "auto", width: "100%"}}>
         {currentElement}
       </div>
+      <div style={{position: "fixed", top: 0, left: 0, right: 0, bottom: 0, display: isLoading ? undefined : "none", backgroundColor: "rgba(0,0,0,0.5"}}></div>
     </div>
   )
 }

@@ -6,6 +6,7 @@ import { LanguageType, getText } from "./translations";
 type AddressesProps = {
   adminData: AdminDataType | null;
   loadAdminData: () => void;
+  isLoading: boolean;
   language: LanguageType;
 };
 
