@@ -205,6 +205,12 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
   }
 
   async function handleGroupCreate() {
+    if(!newCouponGroup?.name) {
+      window.alert(getText("couponGroupNameRequired", language));
+      return;
+    }
+
+
     const requestBody = {
       token: token,
       couponGroup: {
@@ -479,7 +485,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
 
         <div style={style.questionDiv}>
           <label style={style.questionLabel}>{getText("couponGroupQuantityPrefix", language)}</label>
-          <input type="number" style={{...style.numberInputSmall, width:"8rem"}} onChange={handleNewCouponGroupChange} value={newCouponGroup?.quantity || 1} name="quantity" />
+          <input type="number" style={{...style.numberInputSmall, width:"8rem"}} onChange={handleNewCouponGroupChange} value={newCouponGroup?.quantity || 1} max={1_000_000} min={1} name="quantity" />
           <label>{getText("couponGroupQuantitySuffix", language)}</label>
         </div>
 
@@ -494,7 +500,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
                   });
                 }
               }} style={{ marginRight: '0.5rem' }} />
-              <input type="number" id="maxUses" disabled={newCouponGroup.maxUses === null} style={style.numberInputSmall} onChange={handleNewCouponGroupChange} value={newCouponGroup?.maxUses || quantityMemory} name="maxUses" />
+              <input type="number" id="maxUses" disabled={newCouponGroup.maxUses === null} style={style.numberInputSmall} onChange={handleNewCouponGroupChange} value={newCouponGroup?.maxUses || quantityMemory} min={1} max={10_000_000} name="maxUses" />
               <label>{getText("couponGroupMaxUsesSuffix", language)}</label>
             </div>
             <div style={{padding: "0.25rem", background: newCouponGroup.maxUses === null ? "#fff" : "#ccc", color: newCouponGroup.maxUses === null ? "#000" : "#888"}}>

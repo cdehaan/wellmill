@@ -219,6 +219,8 @@ const translations = [
     { id: "unused", en: "Unused", jp: "未使用" },
     { id: "partiallyUsed", en: "Partly used", jp: "一部使用" },
     { id: "fullyUsed", en: "Fully used", jp: "使用済" },
+
+    { id: "couponGroupNameRequired", en: "Group name is required", jp: "グループ名は必須です" },
 ];
 
 export default translations;
