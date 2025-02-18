@@ -445,7 +445,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
 
     tableRow: {
       display: "grid",
-      gridTemplateColumns: "4rem 8rem 10rem 10rem 6rem 8rem 8rem 8rem 1fr",
+      gridTemplateColumns: "4rem 8rem 10rem 10rem 6rem 10rem 8rem 8rem 1fr",
       borderTop: "2px solid #888",
       alignItems: "center",
       paddingTop: "0.5rem",
@@ -618,10 +618,10 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
     );
   
     const usedText = (
-      <div style={{display: "flex", flexDirection:"column", gap: "0rem"}}>
-        <span style={{color: "#4caf50", fontWeight: "bold"}}>{getText("Unused", language)}: {unusedCount}</span>
-        <span style={{color: "#ff9800", fontWeight: "bold"}}>{getText("Used", language)}: {usedCount}</span>
-        <span style={{color: "#f44336", fontWeight: "bold"}}>{getText("UsedUp", language)}: {usedupCount}</span>
+      <div style={{display: "grid", alignItems:"end", gridTemplateColumns:"1fr 3rem", gap: "0rem"}}>
+        <span style={{color: "#4caf50", textAlign: "end", fontWeight: "bold"}}>{getText("unused", language)}:</span><span>{unusedCount}</span>
+        <span style={{color: "#ff9800", textAlign: "end", fontWeight: "bold"}}>{getText("partiallyUsed", language)}:</span><span>{usedCount}</span>
+        <span style={{color: "#f44336", textAlign: "end", fontWeight: "bold"}}>{getText("fullyUsed", language)}:</span><span>{usedupCount}</span>
       </div>
     )  
 
@@ -652,7 +652,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
         <span>{getText("couponGroupName", language)}</span>
         <span>{getText("couponGroupCodeStem", language)}</span>
         <span>{getText("couponGroupCount", language)}</span>
-        <span>{getText("couponGroupUseText", language)}</span>
+        <span style={{textAlign: "end"}}>{getText("couponGroupUseText", language)}</span>
         <span>{getText("couponGroupUseChart", language)}</span>
         <span>{getText("export", language)}</span>
         <span>{getText("actions", language)}</span>

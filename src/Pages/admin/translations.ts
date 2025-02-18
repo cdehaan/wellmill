@@ -216,6 +216,9 @@ const translations = [
     { id: "couponGroupActivateConfirmation", en: "Are you sure you want to activate this coupon group?", jp: "このクーポングループをアクティブにしてもよろしいですか？" },
     { id: "couponGroupDeactivateConfirmation", en: "Are you sure you want to deactivate this coupon group?", jp: "このクーポングループを非アクティブにしてもよろしいですか？" },
     { id: "maxUses", en: "Max uses", jp: "最大使用回数" },
+    { id: "unused", en: "Unused", jp: "未使用" },
+    { id: "partiallyUsed", en: "Partly used", jp: "一部使用" },
+    { id: "fullyUsed", en: "Fully used", jp: "使用済" },
 ];
 
 export default translations;
