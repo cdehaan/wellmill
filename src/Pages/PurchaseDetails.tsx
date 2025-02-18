@@ -21,7 +21,7 @@ const breadcrumbs = [
 export default function PurchaseDetails() {
   const { user, userLoading } = useContext(UserContext);
   const { cancelPurchase, printReceipt } = useUserData();
-  const { products, isLoading: productsLoading, error: productsError } = useProducts();
+  const { products, /*isLoading: productsLoading, error: productsError*/ } = useProducts();
   const purchaseKey = (parseInt(useParams().purchaseKey || ""));
   const [cancelError, setCancelError] = useState("");
   const [cancelMessage, setCancelMessage] = useState("");

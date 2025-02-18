@@ -18,8 +18,8 @@ function Remote() {
       <span className="topHeader" style={{whiteSpace: "nowrap"}}>リモート検査<span className={styles.blackHeader}>とは？</span></span>
       <div className={styles.content}>
         <div className={styles.colorImgGrid}>
-          <img className={styles.colorImgMobile} src="remote-01-mobile.png"/>
-          <img className={styles.colorImgMobile} src="remote-02-mobile.png"/>
+          <img className={styles.colorImgMobile} src="remote-01-mobile.png" alt="doctor showing data on a computer screen"/>
+          <img className={styles.colorImgMobile} src="remote-02-mobile.png" alt="2 women speaking"/>
         </div>
           <span className={styles.subHeader}>ウェルミルを使うと何が分かる？どんな検査？</span>
           <div className={styles.colorBox} style={{backgroundColor: "#f9f0f7"}}>
@@ -40,8 +40,8 @@ function Remote() {
           </div>
 
           <div className={styles.colorImgGrid}>
-            <img className={styles.colorImgMobile} src="remote-03-mobile.png"/>
-            <img className={styles.colorImgMobile} src="remote-04-mobile.png"/>
+            <img className={styles.colorImgMobile} src="remote-03-mobile.png" alt="a lab worker running tests"/>
+            <img className={styles.colorImgMobile} src="remote-04-mobile.png" alt="a woman checking her mobile phone on the couch"/>
           </div>
           <span className={styles.subHeader}>検体採取って？</span>
           <div className={styles.colorBox} style={{backgroundColor: "#fdf2d8"}}>
@@ -61,8 +61,8 @@ function Remote() {
 
 
           <div className={styles.colorImgGrid}>
-            <img className={styles.colorImgMobile} src="remote-05-mobile.png"/>
-            <img className={styles.colorImgMobile} src="remote-06-mobile.png"/>
+            <img className={styles.colorImgMobile} src="remote-05-mobile.png" alt="a doctor speaking to a patient"/>
+            <img className={styles.colorImgMobile} src="remote-06-mobile.png" alt="a man petting a cat"/>
           </div>
           <span className={styles.subHeader}>リモート検査のメリット</span>
           <div className={styles.colorBox} style={{backgroundColor: "#f9f0f7"}}>

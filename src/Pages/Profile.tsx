@@ -1,4 +1,4 @@
-import React, { ChangeEvent, MouseEventHandler, useContext, useEffect, useState } from "react";
+import React, { ChangeEvent, useContext, useEffect, useState } from "react";
 
 import '../App.css';
 import styles from "./profile.module.css"
@@ -16,11 +16,6 @@ const breadcrumbs = [
   { text: "マイページ", url: "/account" },
   { text: "アカウント情報", url: "/profile" },
 ];
-
-type UpdateUserResponse = {
-  data: any | null;
-  error: string | null;
-};
 
 // Define an interface for input fields
 interface InputFields {
@@ -58,7 +53,6 @@ function Profile() {
   const { user } = useContext(UserContext);
   const { loginUser, updateUser } = useUserData();
   const {backupCustomerData, data: customerBackupData, error: customerBackupError} = useBackupDB<any>();
-  const [updateUserResponse, setUpdateUserResponse] = useState<UpdateUserResponse | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [inputs, setInputs] = useState<InputFields>({
     lastName: '',
@@ -94,25 +88,26 @@ function Profile() {
   // This will also fire when user data is saved, which is fine. (It's a good way to confirm, actually)
   useEffect(() => {
     if(!user) return;
-    PopulateFields()
-  }, [user])
 
-  function PopulateFields() {
-    if(!user) return;
-    //console.dir(user, { depth: null, colors: true });
-    setInputs(prevInputs => {
-      return {
-        ...prevInputs,
-        firstName: user.firstName || prevInputs.firstName,
-        lastName: user.lastName || prevInputs.lastName,
-        lastNameKana: user.lastNameKana || prevInputs.lastNameKana,
-        firstNameKana: user.firstNameKana || prevInputs.firstNameKana,
-        gender: user.gender || prevInputs.gender,
-        email: user.email || prevInputs.email,
-        birthday: user.birthday ? user.birthday.split('T')[0] : prevInputs.birthday, // This cuts the time off
-      };
-    });
-  }
+    function PopulateFields() {
+      if(!user) return;
+      //console.dir(user, { depth: null, colors: true });
+      setInputs(prevInputs => {
+        return {
+          ...prevInputs,
+          firstName: user.firstName || prevInputs.firstName,
+          lastName: user.lastName || prevInputs.lastName,
+          lastNameKana: user.lastNameKana || prevInputs.lastNameKana,
+          firstNameKana: user.firstNameKana || prevInputs.firstNameKana,
+          gender: user.gender || prevInputs.gender,
+          email: user.email || prevInputs.email,
+          birthday: user.birthday ? user.birthday.split('T')[0] : prevInputs.birthday, // This cuts the time off
+        };
+      });
+    }
+  
+    PopulateFields()
+  }, [user]);
 
   function HandleInputChange(event: ChangeEvent<HTMLInputElement>) {
     const { name, value, type, checked } = event.target;
@@ -350,8 +345,6 @@ function Profile() {
           <span onClick={() => {setShowPasswordModal(prev => {return !prev})}} style={{textDecoration: "underline", cursor: "pointer"}}>パスワードを変更する</span>
         </div>
         <button className={styles.register} style={{maxWidth: "100%"}} onClick={HandleRegistrationClick}>登録</button>
-        {updateUserResponse?.data && false && <p>User created: {JSON.stringify(updateUserResponse?.data)}</p>}
-        {updateUserResponse?.error && false && <p>Error: {updateUserResponse?.error}</p>}
         {customerBackupData?.Status && false && (<span>{(customerBackupData?.Status === 200) ? "✔" : "Error"}</span>)}
         {customerBackupError && false && (<span>{JSON.stringify(customerBackupError)}</span>)}
       </div>
