@@ -294,6 +294,11 @@ export default function CheckoutForm({ setDisplayCheckout, addressesState }: Che
       return;
     }
 
+    if(!termsChecked) {
+      setTermsGlow(true);
+      return;
+    }
+
     setIsSendingPayment(true);
     setMessage(null);
 
