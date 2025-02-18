@@ -167,11 +167,11 @@ export default function Admin() {
         <span style={{color: "#369"}} onClick={() => {setCurrentScreen("Products")}}>{getText("products", language)}</span>
         <span style={{color: "#369"}} onClick={() => {setCurrentScreen("Images")}}> › {getText("images", language)}</span>
         <span style={{color: "#369"}} onClick={() => {setCurrentScreen("Coupons")}}> › {getText("coupons", language)}</span>
-        {/*<span style={{color: "#369"}} onClick={() => {setCurrentScreen("CouponGroups")}}> › {getText("coupongroups", language)}</span>*/}
+        <span style={{color: "#369"}} onClick={() => {setCurrentScreen("CouponGroups")}}> › {getText("coupongroups", language)}</span>
         <hr style={{width: "12rem"}} />
         <select value={language} onChange={(e) => setLanguage(e.target.value as LanguageType)}>
-          <option value="jp">日本語 ▼</option>
-          <option value="en">English ▼</option>
+          <option value="jp">▼ 日本語</option>
+          <option value="en">▼ English</option>
         </select>
         <hr style={{width: "12rem"}} />
         <span style={{fontFamily: "mono", fontSize: "0.6rem"}}>{email}</span><br/><span style={{ width: "1rem", height: "1rem", border: "1px solid #800", display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0.25rem", background: "rgba(255,128,128,0.5)", fontSize: "0.8rem", }} onClick={handleLogout}>X</span>
