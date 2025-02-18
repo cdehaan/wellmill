@@ -194,6 +194,7 @@ const translations = [
     { id: "couponGroupUnambiguous", en: "Avoid ambiguous characters (e.g.: 1, I, l, 0, O)", jp: "曖昧な文字を避ける (1, I, l, 0, O など)" },
     { id: "couponGroupGeneratedExamples", en: "Example coupon codes:", jp: "クーポンコードの例:" },
     { id: "couponDescriptionHeader", en: "This coupon will act as follows:", jp: "このクーポンは以下のように機能します:" },
+    { id: "generateCouponGroup", en: "Generate group", jp: "グループを生成" },
 
     { id: "totalCoupons", en: "Total coupons", jp: "総クーポン数" },
     { id: "couponGroupName", en: "Group name", jp: "グループ名" },

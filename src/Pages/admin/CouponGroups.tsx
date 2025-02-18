@@ -204,7 +204,28 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
     }
   }
 
-  async function handleCouponAppend(couponGroupKey: number) {
+  async function handleGroupCreate() {
+    const requestBody = {
+      token: token,
+      couponGroup: {
+        ...newCouponGroup,
+        couponQuantity: newCouponGroup.quantity,
+      },
+    };
+
+    console.log("requestBody");
+    console.log(requestBody);
+
+    setUpdatingGroups([...updatingGroups, -1]);
+    const responseData = await CallAPI(requestBody, "adminCouponGroupCreate");
+    console.log(responseData);
+    setTimeout(() => {
+      setUpdatingGroups(updatingGroups.filter(key => key !== -1));
+      loadAdminData();
+    }, 500);
+  }
+
+  async function handleGroupAppend(couponGroupKey: number) {
     // Use window.prompt to ask the user for a number
     const input = window.prompt(getText("couponGroupAppendPrompt", language), "100");
 
@@ -261,7 +282,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
   }
   
 
-  async function handleCouponDelete(couponGroupKey: number) {
+  async function handleGroupDelete(couponGroupKey: number) {
     // Show a confirmation dialog to the user
     const confirmed = window.confirm(getText("couponGroupDeleteConfirmation", language));
     
@@ -284,7 +305,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
     }, 500);
   }
 
-  async function handleExport(couponGroupKey: number, format: "csv" | "xlsx") {
+  async function handleGroupExport(couponGroupKey: number, format: "csv" | "xlsx") {
     try {
       const requestBody = {
         token: token,
@@ -561,7 +582,10 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
         </select>
         <span style={{textDecoration: "underline"}}>{getText("couponDescriptionHeader", language)}</span>
         <span style={{borderBottom: "1px dotted #888"}}>{couponDescription}</span>
-        <button onClick={() => {setNewCouponGroup(defaultCouponGroup); setShowAddCouponGroup(false)}}>{getText("cancel", language)}</button>
+        <div style={{display: "flex", justifyContent: "space-evenly", marginTop: "1rem"}}>
+          <button onClick={() => {setNewCouponGroup(defaultCouponGroup); setShowAddCouponGroup(false)}}>{getText("cancel", language)}</button>
+          <button onClick={handleGroupCreate}>{getText("generateCouponGroup", language)}</button>
+        </div>
       </div>
     </div>
   );
@@ -580,16 +604,16 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
 
     const groupActions = (
       <div style={{display: "flex", gap: "0.5rem"}}>
-        <span style={style.actionSpan} onClick={() => {handleCouponAppend(couponGroup.couponGroupKey)}}>{getText("addCoupons", language)}</span>
+        <span style={style.actionSpan} onClick={() => {handleGroupAppend(couponGroup.couponGroupKey)}}>{getText("addCoupons", language)}</span>
         {active ? <span style={style.actionSpan} onClick={() => {handleGroupActivate(couponGroup.couponGroupKey, false)}}>{getText("deactivateCouponGroup", language)}</span> : <span style={style.actionSpan} onClick={() => {handleGroupActivate(couponGroup.couponGroupKey, true)}}>{getText("activateCouponGroup", language)}</span>}
-        <span style={style.actionSpan} onClick={() => {handleCouponDelete(couponGroup.couponGroupKey)}}>{getText("deleteCouponGroup", language)}</span>
+        <span style={style.actionSpan} onClick={() => {handleGroupDelete(couponGroup.couponGroupKey)}}>{getText("deleteCouponGroup", language)}</span>
       </div>
     );
 
     const exportButtons = (
       <div>
-        <img src={csvIcon} alt="Export CSV" style={style.exportButton} onClick={() => {handleExport(couponGroup.couponGroupKey, "csv")}} />
-        <img src={excelIcon} alt="Export Excel" style={style.exportButton} onClick={() => {handleExport(couponGroup.couponGroupKey, "xlsx")}} />
+        <img src={csvIcon} alt="Export CSV" style={style.exportButton} onClick={() => {handleGroupExport(couponGroup.couponGroupKey, "csv")}} />
+        <img src={excelIcon} alt="Export Excel" style={style.exportButton} onClick={() => {handleGroupExport(couponGroup.couponGroupKey, "xlsx")}} />
       </div>
     );
   
