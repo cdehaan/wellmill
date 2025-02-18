@@ -116,16 +116,18 @@ export default function CheckoutForm({ setDisplayCheckout, addressesState }: Che
     }
 
     setCouponMessage(null);
+    
 
-    const calculatedCouponDiscount = Math.round(await CalculateCouponDiscount());
-    const actualCouponDiscount = ((cart.cost - calculatedCouponDiscount) > 0 && (cart.cost - calculatedCouponDiscount) < 50) ? (cart.cost - 50) : calculatedCouponDiscount;
-    if(calculatedCouponDiscount !== actualCouponDiscount) {
-      setCouponMessage("最低支払額は50円です。");
-    }
-
-    setCouponDiscount(Math.min(actualCouponDiscount, cart.cost));
-    localStorage.setItem(couponKeyName, actualCouponDiscount.toString());
-
+                  // so much commented out because all this needs to be on the server now because there might be millions of coupons
+//    const calculatedCouponDiscount = Math.round(await CalculateCouponDiscount());
+//    const actualCouponDiscount = ((cart.cost - calculatedCouponDiscount) > 0 && (cart.cost - calculatedCouponDiscount) < 50) ? (cart.cost - 50) : calculatedCouponDiscount;
+//    if(calculatedCouponDiscount !== actualCouponDiscount) {
+//      setCouponMessage("最低支払額は50円です。");
+//    }
+//
+//    setCouponDiscount(Math.min(actualCouponDiscount, cart.cost));
+//    localStorage.setItem(couponKeyName, actualCouponDiscount.toString());
+//
     const updateIntentData = {
       customerKey: user.customerKey,
       token: user.token,
@@ -134,39 +136,33 @@ export default function CheckoutForm({ setDisplayCheckout, addressesState }: Che
       cartLines: user.cart.lines,
     }
 
-    const expectedNewTotal = cart.cost - actualCouponDiscount;
-    if(expectedNewTotal > 0 && expectedNewTotal < 50) {
-      console.log("Coupon cannot cause total cost to be 1yen to 49yen. New total: " + expectedNewTotal);
-      return;
-    }
+//    const expectedNewTotal = cart.cost - actualCouponDiscount;
+//    if(expectedNewTotal > 0 && expectedNewTotal < 50) {
+//      console.log("Coupon cannot cause total cost to be 1yen to 49yen. New total: " + expectedNewTotal);
+//      return;
+//    }
 
     const CallAPIResponse = await CallAPI(updateIntentData, "updatePaymentIntent");
+    const couponDiscount = CallAPIResponse?.data?.couponDiscount || 0;
+    setCouponDiscount(Math.min(couponDiscount, cart.cost));
+    localStorage.setItem(couponKeyName, couponDiscount.toString());
 
-    if(CallAPIResponse.data.amount !== (expectedNewTotal)) {
-      console.log("Coupon discount did not match the expected amount.");
-      console.log("CallAPIResponse.data.amount: " + CallAPIResponse.data.amount + ", expectedNewTotal: " + (expectedNewTotal));
-    }
-
-    const returnedCouponDiscount = CallAPIResponse.data.couponDiscount;
-    if(returnedCouponDiscount !== actualCouponDiscount) {
-      console.log("Coupon discount did not match the expected amount.");
-      console.log("returnedCouponDiscount: " + returnedCouponDiscount + ", couponDiscount: " + actualCouponDiscount);
-    }
-
-    //console.log("purchase");
-    //console.log(purchase);
-    //console.log("CallAPIResponse");
-    //console.log(CallAPIResponse);
-    //console.log("couponDiscount");
-    //console.log(couponDiscount);
-    //console.log("user.purchases");
-    //console.log(user.purchases);
+//    if(CallAPIResponse.data.amount !== (expectedNewTotal)) {
+//      console.log("Coupon discount did not match the expected amount.");
+//      console.log("CallAPIResponse.data.amount: " + CallAPIResponse.data.amount + ", expectedNewTotal: " + (expectedNewTotal));
+//    }
+//
+//    const returnedCouponDiscount = CallAPIResponse.data.couponDiscount;
+//    if(returnedCouponDiscount !== actualCouponDiscount) {
+//      console.log("Coupon discount did not match the expected amount.");
+//      console.log("returnedCouponDiscount: " + returnedCouponDiscount + ", couponDiscount: " + actualCouponDiscount);
+//    }
 
     setUser(prevUser => {
       if(!prevUser) return null;
       const newPurchases = prevUser.purchases.map(prch => {
         if(prch.paymentIntentId === paymentIntentId) { // Directly use paymentIntentId assuming it's available in this scope
-          return {...prch, couponDiscount: actualCouponDiscount};
+          return {...prch, couponDiscount: couponDiscount};
         }
         return prch;
       });
@@ -174,6 +170,7 @@ export default function CheckoutForm({ setDisplayCheckout, addressesState }: Che
     });
   }
 
+  // this all must be done on the server, since we might have millions of coupons
   async function CalculateCouponDiscount() {
     if(!user) {
       console.log("User is not defined when trying to calculate a coupon value.");
