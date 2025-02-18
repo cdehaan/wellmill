@@ -194,7 +194,7 @@ export default function Customers({ adminData, loadAdminData, language }: Custom
 
     for (const purchase of purchases) {
       const billingAddress = adminData.addresses.find(a => a.addressKey === purchase.addressKey);
-      haystack = haystack + (purchase.email) + (billingAddress?.firstName || "") + (billingAddress?.lastName || "") + (billingAddress?.postalCode || "") + (billingAddress?.pref || "") + (billingAddress?.city || "") + (billingAddress?.ward || "") + (billingAddress?.address2 || "") + (billingAddress?.phoneNumber || "");
+      haystack = haystack + (purchase.email) + (purchase.couponCode) + (billingAddress?.firstName || "") + (billingAddress?.lastName || "") + (billingAddress?.postalCode || "") + (billingAddress?.pref || "") + (billingAddress?.city || "") + (billingAddress?.ward || "") + (billingAddress?.address2 || "") + (billingAddress?.phoneNumber || "");
       const lineItems = adminData.lineItems.filter(li => li.purchaseKey === purchase.purchaseKey);
       for (const lineItem of lineItems) {
         haystack = haystack + (lineItem.firstName || "") + (lineItem.lastName || "") + (lineItem.postalCode || "") + (lineItem.pref || "") + (lineItem.city || "") + (lineItem.ward || "") + (lineItem.address2 || "") + (lineItem.phoneNumber || "");
