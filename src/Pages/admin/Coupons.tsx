@@ -39,21 +39,22 @@ export default function Coupons({ adminData, loadAdminData, language }: CouponsP
   const products = adminData?.products;
   if (!coupons || !products) return <span>Loading coupons and products...</span>;
 
+  const couponTypes = [1, 2, 3, 5];
   const couponExplanationJp = (
     <div style={{display: "inline-flex", flexDirection:"column", border:"1px solid #888", borderRadius: "0.5rem", padding: "0.5rem", margin: "0.5rem"}}>
       <span style={{fontSize:"1.5rem"}}>クーポンタイプの説明:</span>
-      <div><span> - クーポンタイプ 1: </span><span> 顧客が X 円以上お買い上げの場合、 Y 円割引となります。</span></div>
-      <div><span> - クーポンタイプ 2: </span><span> 顧客が X 円以上お買い上げの場合、 Y %割引となります。</span></div>
-      <div><span> - クーポンタイプ 3: </span><span> 顧客が製品 A を B 個以上購入すると、C 円の割引となります</span></div>
+      <div style={{display: "grid", gridTemplateColumns: "10rem 1fr"}}>
+        {couponTypes.map((type) => (<><span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>{couponTypeName(type, "jp")}: </span><span>{couponTypeDescription(type, "X", "Y", null, "jp")}</span></>))}
+      </div>
     </div>
   );
 
   const couponExplanationEn = (
     <div style={{display: "inline-flex", flexDirection:"column", border:"1px solid #888", borderRadius: "0.5rem", padding: "0.5rem", margin: "0.5rem"}}>
-      <span style={{fontSize:"1.5rem"}}>Coupon type explanation:</span>
-      <div><span> - Coupon type 1: </span><span> If a customer spends X yen or more, they get a discount of Y yen.</span></div>
-      <div><span> - Coupon type 2: </span><span> If a customer spends X yen or more, they get a discount of Y%.</span></div>
-      <div><span> - Coupon type 3: </span><span> If a customer buys B or more of product A, they get a discount of C yen.</span></div>
+      <span style={{fontSize:"1.5rem"}}>Coupon explanation:</span>
+      <div style={{display: "grid", gridTemplateColumns: "10rem 1fr"}}>
+        {couponTypes.map((type) => (<><span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>{couponTypeName(type, "en")}: </span><span>{couponTypeDescription(type, "X", "Y", null, "en")}</span></>))}
+      </div>
     </div>
   );
 
@@ -163,6 +164,60 @@ export default function Coupons({ adminData, loadAdminData, language }: CouponsP
       </div>
     )
   });
+
+  function couponTypeName(type: number, language: "en" | "jp"): string {
+    let typeName = "";
+    switch (type) {
+      case 1:
+        typeName = language === "en" ? "Yen Discount" : language === "jp" ? "~~¥ 割引" : "Unknown language";
+        break;
+      case 2:
+        typeName = language === "en" ? "Percent Discount" : language === "jp" ? "~~% 割引" : "Unknown language";
+        break;
+      case 3:
+        typeName = language === "en" ? "Product Discount" : language === "jp" ? "製品 ~~¥ 割引" : "Unknown language";
+        break;
+      case 5:
+        typeName = language === "en" ? "Quantity Discount" : language === "jp" ? "製品 ~~% 割引" : "Unknown language";
+        break;
+      default:
+        typeName = "Unknown coupon type";
+    }
+    return typeName;
+  }
+
+  function couponTypeDescription(type: number, target: number | string, reward: number | string, productKey: number | null, language: "en" | "jp"): string {
+    let couponDescription = "";
+    switch (type) {
+      case 1:
+        couponDescription =
+          language === "en" ? `If the customer spends at least ¥${target}, they will get a discount of ¥${reward}.` :
+          language === "jp" ? `顧客が${target}円以上購入すると、${reward}円の割引が受けられます。` :
+          "Unknown language";
+        break;
+      case 2:
+        couponDescription =
+          language === "en" ? `If the customer spends at least ¥${target}, they will get a discount of ${reward}%.` :
+          language === "jp" ? `顧客が${target}円以上購入すると、${reward}%の割引が受けられます。` :
+          "Unknown language";
+        break;
+      case 3:
+        couponDescription =
+          language === "en" ? `If the customer buys at least ${target} of product [${products?.find(product => product.productKey === productKey)?.title || " ? "}], they will get a discount of ¥${reward}.` :
+          language === "jp" ? `顧客が「${products?.find(product => product.productKey === productKey)?.title || " (製品) "}」を${target}個以上購入すると、${reward}円の割引が受けられます。` :
+          "Unknown language";
+        break;
+      case 5:
+        couponDescription =
+          language === "en" ? `For the ${target} most expensive products of any type that the customer buys, they will get a discount of ${reward}% off those items.` :
+          language === "jp" ? `顧客が購入する商品の中で、最も高価な${target}個の商品に対して${reward}%の割引が適用されます。` :
+          "Unknown language";
+        break;
+      default:
+        couponDescription = "Unknown coupon type";
+    }
+    return couponDescription;
+  }
 
   function couponDataToExplanation(coupon: CouponFields) {
     switch(coupon.type) {

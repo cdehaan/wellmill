@@ -1,4 +1,4 @@
-export default async function CallAPI(data:object, endpoint: string) {
+export default async function CallAPI(data:object, endpoint: string, filename?: string) {
   const requestBody = JSON.stringify({data: data});
 
   const subdomain = window.location.hostname.split('.')[0];
@@ -42,14 +42,16 @@ export default async function CallAPI(data:object, endpoint: string) {
       return { data: data, error: null };
     }
 
-    if (contentType?.includes('application/pdf')) {
-      // Handle PDF (file download)
+    if (contentType?.includes('application/pdf') || contentType?.includes('text/csv') || contentType?.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+      // Handle file download
       const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.style.display = 'none';
       a.href = downloadUrl;
-      a.download = 'receipt.pdf'; // You can set a default name for the download
+
+      const suggestedFileName = filename || response.headers.get('Content-Disposition')?.split('filename=')[1] || (contentType.includes('csv') ? 'groupData.csv' : contentType.includes('pdf') ? "receipt.pdf" : 'groupData.xlsx');
+      a.download = suggestedFileName;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(downloadUrl);
@@ -58,7 +60,6 @@ export default async function CallAPI(data:object, endpoint: string) {
     }
 
     return { data: null, error: "Unknown returned content type" };
-
   } catch (error: any) {
     return { data: null, error: error.message };
   }

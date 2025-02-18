@@ -647,6 +647,7 @@ export const useUserData = (): UseUserDataReturnType => {
         note: null,
         amount: user.cart.cost,
         couponDiscount: 0,
+        couponCode: null,
         email: null,
         newPurchaseJson: null,
         lineItems: lineItems,

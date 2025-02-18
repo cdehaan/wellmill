@@ -29,7 +29,7 @@ type customerSortField = {
 };
 
 const buttonStyle = {
-  width: "4rem", 
+  width: "calc(4rem - 2px)", 
   height: "1.5rem",
   backgroundColor: "#FAFBFC",
   border: "1px solid rgba(27, 31, 35, 0.15)",
@@ -137,28 +137,32 @@ export default function Customers({ adminData, loadAdminData, language }: Custom
     <div style={{display:"flex", padding: "0.5rem", backgroundColor:"#9cf"}}>
       <span style={{width:  "6rem"}}>{getText("purchaseNumber", language)}</span>
       <span style={{width:  "4rem"}} onClick={handleSortClick} data-name="customerKey">{customerSortField.fieldName === "customerKey" ? customerSortField.desc === true ? "▲ " : "▼ " : "■ " }{getText("key", language)}</span>
-      <span style={{width: "10rem"}} onClick={handleSortClick} data-name="firstName">{customerSortField.fieldName === "firstName" ? customerSortField.desc === true ? "▲ " : "▼ " : "■ " }{getText("firstName", language)}</span>
-      <span style={{width: "10rem"}} onClick={handleSortClick} data-name="lastName">{customerSortField.fieldName === "lastName" ? customerSortField.desc === true ? "▲ " : "▼ " : "■ " }{getText("lastName", language)}</span>
-      <span style={{width: "10rem"}} onClick={handleSortClick} data-name="firstNameKana">{customerSortField.fieldName === "firstNameKana" ? customerSortField.desc === true ? "▲ " : "▼ " : "■ " }{getText("firstNameKana", language)}</span>
-      <span style={{width: "10rem"}} onClick={handleSortClick} data-name="lastNameKana">{customerSortField.fieldName === "lastNameKana" ? customerSortField.desc === true ? "▲ " : "▼ " : "■ " }{getText("lastNameKana", language)}</span>
+      <span style={{width: "6rem"}} onClick={handleSortClick} data-name="firstName">{customerSortField.fieldName === "firstName" ? customerSortField.desc === true ? "▲ " : "▼ " : "■ " }{getText("firstName", language)}</span>
+      <span style={{width: "6rem"}} onClick={handleSortClick} data-name="lastName">{customerSortField.fieldName === "lastName" ? customerSortField.desc === true ? "▲ " : "▼ " : "■ " }{getText("lastName", language)}</span>
+      <span style={{width: "6rem"}} onClick={handleSortClick} data-name="firstNameKana">{customerSortField.fieldName === "firstNameKana" ? customerSortField.desc === true ? "▲ " : "▼ " : "■ " }{getText("firstNameKana", language)}</span>
+      <span style={{width: "6rem"}} onClick={handleSortClick} data-name="lastNameKana">{customerSortField.fieldName === "lastNameKana" ? customerSortField.desc === true ? "▲ " : "▼ " : "■ " }{getText("lastNameKana", language)}</span>
       <span style={{width:  "6rem"}} onClick={handleSortClick} data-name="gender">{customerSortField.fieldName === "gender" ? customerSortField.desc === true ? "▲ " : "▼ " : "■ " }{getText("gender", language)}</span>
       <span style={{width: "10rem"}} onClick={handleSortClick} data-name="birthday">{customerSortField.fieldName === "birthday" ? customerSortField.desc === true ? "▲ " : "▼ " : "■ " }{getText("birthday", language)}</span>
-      <span style={{width: "20rem"}} onClick={handleSortClick} data-name="email">{customerSortField.fieldName === "email" ? customerSortField.desc === true ? "▲ " : "▼ " : "■ " }{getText("email", language)}</span>
-      <span style={{width:  "4rem"}}>{getText("termsOfService", language)}</span>
+      <span style={{width: "16rem"}} onClick={handleSortClick} data-name="email">{customerSortField.fieldName === "email" ? customerSortField.desc === true ? "▲ " : "▼ " : "■ " }{getText("email", language)}</span>
+      <span style={{width:  "6rem"}}>{getText("termsOfService", language)}</span>
+      <span style={{width:  "8rem"}}>{getText("latestCouponCode", language)}</span>
+      <span style={{width:  "6rem"}}>{getText("couponsUsed", language)}</span>
+      <span style={{width:  "4rem"}}>{getText("couponDiscountsTotal", language)}</span>
     </div>
   )
 
   const purchaseHeader = (
-    <div style={{display:"flex", padding: "0.5rem", backgroundColor:"#4bc387"}}>
-      <span style={{width:  "6rem"}}>{getText("productsQuantity", language)}商品の数量</span>
+    <div style={{display:"flex", padding: "0rem", backgroundColor:"#4bc387"}}>
+      <span style={{width:  "6rem", backgroundColor:"rgba(0,0,0,0.1"}}>{getText("productsQuantity", language)}</span>
       <span style={{width: "20rem"}}>Stripe ID</span>
-      <span style={{width: "15rem"}}>{getText("email", language)}</span>
-      <span style={{width: "10rem"}}>{getText("paymentStatus", language)}</span>
-      <span style={{width: "10rem"}}>{getText("firstAddedAt", language)}</span>
-      <span style={{width: "10rem"}}>{getText("purchasedAt", language)}</span>
-      <span style={{width: "10rem"}}>{getText("refundedAt", language)}</span>
-      <span style={{width: "10rem"}}>{getText("purchaseTotal", language)}</span>
-      <span style={{width: "10rem"}}>{getText("couponDiscount", language)}</span>
+      <span style={{width: "15rem", backgroundColor:"rgba(0,0,0,0.1"}}>{getText("email", language)}</span>
+      <span style={{width: "6rem"}}>{getText("paymentStatus", language)}</span>
+      <span style={{width: "12rem", backgroundColor:"rgba(0,0,0,0.1"}}>{getText("firstAddedAt", language)}</span>
+      <span style={{width: "12rem"}}>{getText("purchasedAt", language)}</span>
+      <span style={{width: "12rem", backgroundColor:"rgba(0,0,0,0.1"}}>{getText("refundedAt", language)}</span>
+      <span style={{width: "6rem"}}>{getText("purchaseTotal", language)}</span>
+      <span style={{width: "7rem", backgroundColor:"rgba(0,0,0,0.1"}}>{getText("couponDiscount", language)}</span>
+      <span style={{width: "6rem"}}>{getText("couponCode", language)}</span>
     </div>
   );
 
@@ -244,16 +248,17 @@ export default function Customers({ adminData, loadAdminData, language }: Custom
 
       return (
         <>
-          <div key={purchase.purchaseKey} style={{display:"flex", backgroundColor: "#dfe", padding: "0.5rem"}}>
-            <span style={buttonStyle} onClick={() => {togglePurchaseExpansion(purchase.purchaseKey || 0)}}>{lineItems.length} ⌄</span>
+          <div key={purchase.purchaseKey} style={{display:"flex", backgroundColor: "#dfe", padding: "0.0rem"}}>
+            <span style={{...buttonStyle}} onClick={() => {togglePurchaseExpansion(purchase.purchaseKey || 0)}}>{lineItems.length} ⌄</span>
             <span style={{width: "20rem"}}>{purchase.paymentIntentId || "-"}</span>
-            <span style={{width: "15rem"}}>{purchase.email || "-"}</span>
-            <span style={{width: "10rem"}}>{getText(purchase.status, language) || "-"}</span>
-            <span style={{width: "10rem"}}>{formatDateToJapanTimezone(purchase.creationTime)}</span>
-            <span style={{width: "10rem"}}>{formatDateToJapanTimezone(purchase.purchaseTime)}</span>
-            <span style={{width: "10rem"}}>{formatDateToJapanTimezone(purchase.refundTime)}</span>
-            <span style={{width: "10rem"}}>¥{purchase.amount || 0}</span>
-            <span style={{width: "10rem"}}>¥{purchase.couponDiscount || 0}</span>
+            <span style={{width: "15rem", backgroundColor: "rgba(0,0,0,0.1)"}}>{purchase.email || "-"}</span>
+            <span style={{width: "6rem"}}>{getText(purchase.status, language) || "-"}</span>
+            <span style={{width: "12rem", backgroundColor: "rgba(0,0,0,0.1)"}}>{formatDateToJapanTimezone(purchase.creationTime)}</span>
+            <span style={{width: "12rem"}}>{formatDateToJapanTimezone(purchase.purchaseTime)}</span>
+            <span style={{width: "12rem", backgroundColor: "rgba(0,0,0,0.1)"}}>{formatDateToJapanTimezone(purchase.refundTime)}</span>
+            <span style={{width: "6rem"}}>¥{purchase.amount || 0}</span>
+            <span style={{width: "7rem", backgroundColor: "rgba(0,0,0,0.1)"}}>¥{purchase.couponDiscount || 0}</span>
+            <span style={{width: "6rem"}}>{purchase.couponCode || "-"}</span>
           </div>
           {expandedPurchases.has(purchase.purchaseKey) ? (billingAddressInfo) : null}
           {expandedPurchases.has(purchase.purchaseKey) ? (conditionalItemInfo) : null}
@@ -263,6 +268,9 @@ export default function Customers({ adminData, loadAdminData, language }: Custom
 
     const allPurcahseInfo = <div style={{margin: "1.5rem", marginTop: 0, marginBottom:"0.5rem"}}>{purchaseHeader}{purchaseList}</div>
     const conditionalPurchaseInfo = (purchases.length === 0) ? <div style={{display:"flex", backgroundColor: "#dfe", padding: "0.5rem", margin: "1.5rem", marginTop: 0, marginBottom:"0.5rem"}}>No purchases</div> : allPurcahseInfo;
+    const latestCouponCode = purchases.reduce((acc, purchase) => purchase.couponCode ? purchase.couponCode : acc, "");
+    const couponsUsed = purchases.reduce((acc, purchase) => purchase.couponCode ? acc + 1 : acc, 0);
+    const couponDiscountsTotal = purchases.reduce((acc, purchase) => acc + (purchase.couponDiscount || 0), 0);
 
     colourToggle++;
     const backgroundColor = (colourToggle%2 === 1) ? "#def" : "#def"; //"#fff";
@@ -272,14 +280,17 @@ export default function Customers({ adminData, loadAdminData, language }: Custom
         <div key={customer.customerKey} style={{display:"flex", backgroundColor: backgroundColor, padding: "0.5rem"}}>
           <span style={buttonStyle} onClick={() => {toggleCustomerExpansion(customer.customerKey || 0)}}>⌄ {meaningfulPurchases} <span style={{color: "#888", fontSize:"0.7rem", margin: "0 0.25rem"}}>({purchases.length})</span></span>
           <span style={{width:  "4rem"}}>{customer.customerKey}</span>
-          <span style={{width: "10rem"}}>{customer.firstName}</span>
-          <span style={{width: "10rem"}}>{customer.lastName}</span>
-          <span style={{width: "10rem"}}>{customer.firstNameKana}</span>
-          <span style={{width: "10rem"}}>{customer.lastNameKana}</span>
+          <span style={{width: "6rem"}}>{customer.firstName}</span>
+          <span style={{width: "6rem"}}>{customer.lastName}</span>
+          <span style={{width: "6rem"}}>{customer.firstNameKana}</span>
+          <span style={{width: "6rem"}}>{customer.lastNameKana}</span>
           <span style={{width:  "6rem"}}>{getText(customer.gender, language)}</span>
           <span style={{width: "10rem"}}>{customer.birthday?.substring(0,10)}</span>
-          <span style={{width: "20rem"}}>{customer.email}</span>
-          <span style={{width:  "4rem", flexGrow: 1}}><input type="checkbox" checked={meaningfulPurchases > 0} disabled={true} /></span>
+          <span style={{width: "16rem"}}>{customer.email}</span>
+          <span style={{width:  "6rem"}}><input type="checkbox" checked={meaningfulPurchases > 0} disabled={true} /></span>
+          <span style={{width:  "8rem"}}>{latestCouponCode || "-"}</span>
+          <span style={{width:  "6rem"}}>{couponsUsed}</span>
+          <span style={{width:  "4rem", flexGrow: 1}}>¥{couponDiscountsTotal}</span>
           <span onClick={() => {setCurrentCustomerKey(customer.customerKey || null); setDisplayEdit(true)}} style={{width: "2rem"}}>✏️</span>
           <span onClick={() => {setCurrentCustomerKey(customer.customerKey || null); setDisplayDelete(true)}} style={{width: "2rem"}}>🗑️</span>
         </div>

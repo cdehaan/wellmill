@@ -197,6 +197,7 @@ export type Purchase = {
     note: string | null,
     amount: number,
     couponDiscount: number,
+    couponCode: string | null,
     email: string | null,
     newPurchaseJson: string | null,
     lineItems: LineItem[],

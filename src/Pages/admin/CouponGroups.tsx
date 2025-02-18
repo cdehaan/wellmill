@@ -3,6 +3,8 @@ import { AdminDataType } from "../../types";
 import { LanguageType, getText } from "./translations";
 import CouponUsageChart from "../../Components/CouponUsageChart";
 import CallAPI from "../../Utilities/CallAPI";
+import csvIcon from "../../assets/images/csv-icon.png";
+import excelIcon from "../../assets/images/excel-icon.png";
 
 type CouponGroupsProps = {
   adminData: AdminDataType | null;
@@ -228,9 +230,9 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
 
     setUpdatingGroups([...updatingGroups, couponGroupKey]);
     const responseData = await CallAPI(requestBody, "adminCouponGroupAppend");
-    setUpdatingGroups(updatingGroups.filter(key => key !== couponGroupKey));
     console.log(responseData);
     setTimeout(() => {
+      setUpdatingGroups(updatingGroups.filter(key => key !== couponGroupKey));
       loadAdminData();
     }, 500);
   }
@@ -251,9 +253,9 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
 
     setUpdatingGroups([...updatingGroups, couponGroupKey]);
     const responseData = await CallAPI(requestBody, "adminCouponGroupActivate");
-    setUpdatingGroups(updatingGroups.filter(key => key !== couponGroupKey));
     console.log(responseData);
     setTimeout(() => {
+      setUpdatingGroups(updatingGroups.filter(key => key !== couponGroupKey));
       loadAdminData();
     }, 500);
   }
@@ -275,35 +277,41 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
 
     setUpdatingGroups([...updatingGroups, couponGroupKey]);
     const responseData = await CallAPI(requestBody, "adminCouponGroupDelete");
-    setUpdatingGroups(updatingGroups.filter(key => key !== couponGroupKey));
     console.log(responseData);
     setTimeout(() => {
+      setUpdatingGroups(updatingGroups.filter(key => key !== couponGroupKey));
       loadAdminData();
     }, 500);
   }
 
+  async function handleExport(couponGroupKey: number, format: "csv" | "xlsx") {
+    try {
+      const requestBody = {
+        token: token,
+        couponGroupKey: couponGroupKey,
+        format: format,
+      }
+      await CallAPI(requestBody, "adminCouponGroupExport", `Group ${couponGroupKey} Coupon Codes.${format}`);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
-
+  const couponTypes = [1, 2, 3, 5];
   const couponExplanationJp = (
     <div style={{display: "inline-flex", flexDirection:"column", border:"1px solid #888", borderRadius: "0.5rem", padding: "0.5rem", margin: "0.5rem"}}>
       <span style={{fontSize:"1.5rem"}}>クーポンタイプの説明:</span>
       <div style={{display: "grid", gridTemplateColumns: "10rem 1fr"}}>
-        <span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>~~¥ 割引: </span><span>{couponTypeDescription(1, "X", "Y", null, "jp")}</span>
-        <span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>~~% 割引: </span><span>{couponTypeDescription(2, "X", "Y", null, "jp")}</span>
-        <span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>製品 ~~¥ 割引: </span><span>{couponTypeDescription(3, "X", "Y", null, "jp")}</span>
-        <span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>製品 ~~% 割引: </span><span>{couponTypeDescription(5, "X", "Y", null, "jp")}</span>
+        {couponTypes.map((type) => (<><span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>{couponTypeName(type, "jp")}: </span><span>{couponTypeDescription(type, "X", "Y", null, "jp")}</span></>))}
       </div>
     </div>
   );
 
   const couponExplanationEn = (
     <div style={{display: "inline-flex", flexDirection:"column", border:"1px solid #888", borderRadius: "0.5rem", padding: "0.5rem", margin: "0.5rem"}}>
-      <span style={{fontSize:"1.5rem"}}>クーポンタイプの説明:</span>
+      <span style={{fontSize:"1.5rem"}}>Coupon explanation:</span>
       <div style={{display: "grid", gridTemplateColumns: "10rem 1fr"}}>
-        <span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>Yen discount: </span><span>{couponTypeDescription(1, "x", "y", null, "en")}</span>
-        <span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>Percent discount: </span><span>{couponTypeDescription(2, "x", "y", null, "en")}</span>
-        <span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>Product discount: </span><span>{couponTypeDescription(3, "x", "y", null, "en")}</span>
-        <span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>Quantity discount: </span><span>{couponTypeDescription(5, "x", "y", null, "en")}</span>
+        {couponTypes.map((type) => (<><span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>{couponTypeName(type, "en")}: </span><span>{couponTypeDescription(type, "X", "Y", null, "en")}</span></>))}
       </div>
     </div>
   );
@@ -357,6 +365,28 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
     return couponDescription;
   }
 
+  function couponTypeName(type: number, language: "en" | "jp"): string {
+    let typeName = "";
+    switch (type) {
+      case 1:
+        typeName = language === "en" ? "Yen Discount" : language === "jp" ? "~~¥ 割引" : "Unknown language";
+        break;
+      case 2:
+        typeName = language === "en" ? "Percent Discount" : language === "jp" ? "~~% 割引" : "Unknown language";
+        break;
+      case 3:
+        typeName = language === "en" ? "Product Discount" : language === "jp" ? "製品 ~~¥ 割引" : "Unknown language";
+        break;
+      case 5:
+        typeName = language === "en" ? "Quantity Discount" : language === "jp" ? "製品 ~~% 割引" : "Unknown language";
+        break;
+      default:
+        typeName = "Unknown coupon type";
+    }
+    return typeName;
+  }
+
+
   const style = {
     numberInput: {
       height: "4rem",
@@ -394,9 +424,16 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
 
     tableRow: {
       display: "grid",
-      gridTemplateColumns: "4rem 8rem 10rem 10rem 6rem 8rem 8rem 1fr",
-      borderTop: "1px solid #ccc",
+      gridTemplateColumns: "4rem 8rem 10rem 10rem 6rem 8rem 8rem 8rem 1fr",
+      borderTop: "2px solid #888",
       alignItems: "center",
+      paddingTop: "0.5rem",
+      marginTop: "0.5rem",
+    },
+    exportButton: {
+      height: "3rem",
+      width: "3rem",
+      cursor: "pointer",
     },
     actionSpan: {
       padding: "0.25rem",
@@ -441,7 +478,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
             </div>
             <div style={{padding: "0.25rem", background: newCouponGroup.maxUses === null ? "#fff" : "#ccc", color: newCouponGroup.maxUses === null ? "#000" : "#888"}}>
               <input type="radio" id="unlimitedUses" name="couponUsage" value="unlimited" onClick={() => {setQuantityMemory(parseInt((document.getElementById("maxUses") as HTMLInputElement).value)); setNewCouponGroup(prev => { return {...prev, maxUses: null}})}} style={{ marginRight: '0.5rem' }} />
-              <label>{getText("couponGroupMaxUsesSuffix", language)}</label>
+              <label>{getText("couponGroupUnlimitedUsesSuffix", language)}</label>
             </div>
           </div>
         </div>
@@ -483,8 +520,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
               <div style={{display:"flex", alignItems:"center"}}>
                 <label>{getText("couponGroupJumbleLength", language)}</label>
                 <input disabled={codeSourceRadioValue !== "generated"} type="number" min={minimumJumbleLength} style={style.numberInputSmall} onChange={handleNewCouponGroupChange} value={newCouponGroup?.jumbleLength || minimumJumbleLength} name="jumbleLength" />
-                <label>{getText("couponGroupJumbleLengthSuffix", language)}</label>
-                <label>Min: {minimumJumbleLength}</label>
+                <label>{getText("couponGroupJumbleLengthSuffix", language)} (Min: {minimumJumbleLength})</label>
               </div>
               <div style={{display:"flex", alignItems:"center"}}>
                 <input disabled={codeSourceRadioValue !== "generated"} type="checkbox" id="unambiguous" name="unambiguous" onChange={handleNewCouponGroupChange} checked={newCouponGroup?.isUnambiguous || true} />
@@ -549,6 +585,13 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
         <span style={style.actionSpan} onClick={() => {handleCouponDelete(couponGroup.couponGroupKey)}}>{getText("deleteCouponGroup", language)}</span>
       </div>
     );
+
+    const exportButtons = (
+      <div>
+        <img src={csvIcon} alt="Export CSV" style={style.exportButton} onClick={() => {handleExport(couponGroup.couponGroupKey, "csv")}} />
+        <img src={excelIcon} alt="Export Excel" style={style.exportButton} onClick={() => {handleExport(couponGroup.couponGroupKey, "xlsx")}} />
+      </div>
+    );
   
     const usedText = (
       <div style={{display: "flex", flexDirection:"column", gap: "0rem"}}>
@@ -568,16 +611,17 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
           <span>{couponCount}</span>
           {usedText}
           <CouponUsageChart total={couponCount} unused={unusedCount} usedup={usedupCount} scale={0.5} />
+          {exportButtons}
           {groupActions}
         </div>
-        <span>{couponTypeDescription(couponGroup.type, couponGroup.target, couponGroup.reward, couponGroup.productKey, language)}</span>
+        <span><span style={{fontWeight:"bold"}}>{couponTypeName(couponGroup.type, language)}</span> - {couponTypeDescription(couponGroup.type, couponGroup.target, couponGroup.reward, couponGroup.productKey, language)} - {getText("maxUses", language)}: {couponGroup.maxUses}</span>
         <div style={{display: updatingGroups.includes(couponGroup.couponGroupKey) ? undefined : "none", position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5"}}></div>
       </div>
     );
   });
 
   const couponGroupTable = (
-    <div style={{display: "flex", flexDirection:"column", margin: "1rem 0"}}>
+    <div style={{display: "flex", flexDirection:"column", margin: "1rem 0", paddingBottom: "0.5rem", borderBottom: "2px solid #888"}}>
       <div style={style.tableRow}>
         <span>{getText("couponGroupKey", language)}</span>
         <span>{getText("couponGroupStatus", language)}</span>
@@ -586,6 +630,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
         <span>{getText("couponGroupCount", language)}</span>
         <span>{getText("couponGroupUseText", language)}</span>
         <span>{getText("couponGroupUseChart", language)}</span>
+        <span>{getText("export", language)}</span>
         <span>{getText("actions", language)}</span>
       </div>
       {couponGroupRows}

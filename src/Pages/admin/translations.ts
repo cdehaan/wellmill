@@ -24,6 +24,7 @@ const translations = [
     { id: "upload", en: "Upload", jp: "アップロード" },
     { id: "create", en: "Create", jp: "作成" },
     { id: "search", en: "Search", jp: "検索" },
+    { id: "export", en: "Export", jp: "エクスポート" },
     { id: "none", en: "None", jp: "なし" },
     { id: "advancedOptions", en: "Advanced options ▼", jp: "詳細オプション ▼" },
     { id: "actions", en: "Actions", jp: "アクション" },
@@ -42,7 +43,7 @@ const translations = [
     { id: "products", en: "Products", jp: "商品" },
     { id: "images", en: "Images", jp: "画像" },
     { id: "coupons", en: "Coupons", jp: "クーポン" },
-    { id: "coupongroups", en: "Coupon Groups", jp: "一括クーポン" },
+    { id: "coupongroups", en: "Coupon Groups", jp: "クーポングループ" },
 
 
 
@@ -58,14 +59,17 @@ const translations = [
     { id: "purchaseNumber", en: "Purchase number", jp: "購入数" },
     { id: "firstName", en: "First name", jp: "名" },
     { id: "lastName", en: "Last name", jp: "姓" },
-    { id: "firstNameKana", en: "Phonetic first name", jp: "名（カナ）" },
-    { id: "lastNameKana", en: "Phonetic last name", jp: "姓（カナ）" },
+    { id: "firstNameKana", en: "Phonetic first name", jp: "名-カナ" },
+    { id: "lastNameKana", en: "Phonetic last name", jp: "姓-カナ" },
     { id: "gender", en: "Gender", jp: "性別" },
     { id: "male", en: "Male", jp: "男性" },
     { id: "female", en: "Female", jp: "女性" },
     { id: "birthday", en: "Birthday", jp: "誕生日" },
     { id: "email", en: "Email", jp: "メール" },
     { id: "termsOfService", en: "Terms of service", jp: "利用規約" },
+    { id: "latestCouponCode", en: "Latest coupon", jp: "最新のクーポン" },
+    { id: "couponsUsed", en: "Coupons used", jp: "クーポン数" },
+    { id: "couponDiscountsTotal", en: "Total discounts", jp: "割引合計" },
     { id: "currentDefaultAddress", en: "Current default address", jp: "現在のデフォルト住所" },
 
     { id: "productsQuantity", en: "Products quantity", jp: "商品の数量" },
@@ -166,8 +170,8 @@ const translations = [
     { id: "couponExplanation", en: "Coupon Explanation", jp: "クーポン説明" },
 
     /* Bulk coupons / coupon groups */
-    { id: "addCouponGroup", en: "Add bulk coupons", jp: "一括クーポンを追加" },
-    { id: "couponGroupName", en: "Group name", jp: "一括クーポン名" },
+    { id: "addCouponGroup", en: "Create coupon group", jp: "クーポングループを追加" },
+    { id: "couponGroupName", en: "Group name", jp: "グループ名" },
     { id: "couponGroupNamePlaceholder", en: "Fall", jp: "Fall" },
     { id: "couponGroupNameRules", en: "Only English characters can be used. This won't be seen by the customer.", jp: "英語の文字のみ使用可能。これは顧客には表示されません。" },
     { id: "couponGroupQuantityPrefix", en: "Create", jp: "クーポンを" },
@@ -210,6 +214,7 @@ const translations = [
     { id: "couponGroupAppendInvalid", en: "Invalid number of coupons to append", jp: "追加するクーポンの数が無効です" },
     { id: "couponGroupActivateConfirmation", en: "Are you sure you want to activate this coupon group?", jp: "このクーポングループをアクティブにしてもよろしいですか？" },
     { id: "couponGroupDeactivateConfirmation", en: "Are you sure you want to deactivate this coupon group?", jp: "このクーポングループを非アクティブにしてもよろしいですか？" },
+    { id: "maxUses", en: "Max uses", jp: "最大使用回数" },
 ];
 
 export default translations;
