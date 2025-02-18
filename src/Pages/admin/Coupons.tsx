@@ -75,26 +75,29 @@ export default function Coupons({ adminData, loadAdminData, language }: CouponsP
 
   const addCouponModal = (
     <div style={{position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", backgroundColor: "rgba(0,0,0,0.5)", zIndex: 100}}>
-      <div style={{display:"flex", flexDirection:"column", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", backgroundColor: "#fff", padding: "1rem", borderRadius: "0.5rem"}}>
+      <div style={{display:"flex", flexDirection:"column", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", backgroundColor: "#fff", padding: "1rem", borderRadius: "0.5rem", minWidth: "50%", minHeight: "90%"}}>
         <h3>{getText("addCoupon", language)}</h3>
         <label>{getText("couponCode", language)}</label>
         <input type="text" placeholder="abc123Code" onChange={handleNewCouponChange} value={newCoupon?.code || ""} name="code" />
-        <label>{getText("couponProduct", language)}</label>
-        <select onChange={handleNewCouponChange} value={newCoupon?.productKey || ""} name="productKey">
-          {products.map((product) => <option key={product.productKey} value={product.productKey}>{product.title}</option>)}
-        </select>
         <label>{getText("couponType", language)}</label>
         <select onChange={handleNewCouponChange} value={newCoupon?.type || 1} name="type">
-          <option value={1}>{getText("couponYenDiscount", language)}</option>
-          <option value={2}>{getText("couponPercentDiscount", language)}</option>
-          <option value={3}>{getText("couponProductDiscount", language)}</option>
+          <option value={1}>{couponTypeName(1, language)}</option>
+          <option value={2}>{couponTypeName(2, language)}</option>
+          <option value={3}>{couponTypeName(3, language)}</option>
+          <option value={5}>{couponTypeName(5, language)}</option>
+        </select>
+        <label style={{display: newCoupon?.type == 3 ? undefined : "none"}} >{getText("couponProduct", language)}</label>
+        <select onChange={handleNewCouponChange} value={newCoupon?.productKey || ""} name="productKey" style={{display: newCoupon?.type == 3 ? undefined : "none"}}>
+          {products.map((product) => <option key={product.productKey} value={product.productKey}>{product.title}</option>)}
         </select>
         <label>{getText("couponTarget", language)}</label>
         <input type="number" style={numberInputStyle} onChange={handleNewCouponChange} value={newCoupon?.target || 0} name="target" />
         <label>{getText("couponReward", language)}</label>
         <input type="number" style={numberInputStyle} onChange={handleNewCouponChange} value={newCoupon?.reward || 0} name="reward"/>
-        <button onClick={() => {handleCouponSave()}}>{getText("create", language)}</button>
-        <button onClick={() => {setShowAddCoupon(false)}}>{getText("cancel", language)}</button>
+        <div style={{display:"flex", flexDirection:"row", justifyContent:"space-evenly"}}>
+          <button onClick={() => {setShowAddCoupon(false)}}>{getText("cancel", language)}</button>
+          <button onClick={() => {handleCouponSave()}}>{getText("create", language)}</button>
+        </div>
       </div>
     </div>
   );
@@ -141,7 +144,7 @@ export default function Coupons({ adminData, loadAdminData, language }: CouponsP
   const couponListHeader = (
     <div style={{display: "flex", flexDirection:"row", backgroundColor:"#9cf", padding:"0.5rem"}}>
       <span style={{display:"flex", fontSize:"1.5rem", width:"30rem"}}>{getText("couponCode", language)}</span>
-      <span style={{display:"flex", fontSize:"1.5rem", width: "8rem"}}>{getText("couponType", language)}</span>
+      <span style={{display:"flex", fontSize:"1.5rem", width:"12rem"}}>{getText("couponType", language)}</span>
       <span style={{display:"flex", fontSize:"1.5rem", width:"12rem"}}>{getText("couponTarget", language)}</span>
       <span style={{display:"flex", fontSize:"1.5rem", width: "6rem"}}>{getText("couponProduct", language)}</span>
       <span style={{display:"flex", fontSize:"1.5rem", width:"12rem"}}>{getText("couponReward", language)}</span>
@@ -154,7 +157,7 @@ export default function Coupons({ adminData, loadAdminData, language }: CouponsP
       <div key={coupon.couponKey} style={{backgroundColor: backgroundColor, padding:"0.5rem"}}>
         <div style={{display: "flex", flexDirection:"row"}}>
           <span style={{display:"flex", fontSize:"1.5rem", width:"30rem"}}>{coupon.code}</span>
-          <span style={{display:"flex", fontSize:"1.5rem", width: "8rem"}}>{coupon.type}</span>
+          <span style={{display:"flex", fontSize:"1.5rem", width:"12rem"}}>{couponTypeName(coupon.type, language)}</span>
           <span style={{display:"flex", fontSize:"1.5rem", width:"12rem"}}>{coupon.target}</span>
           <span style={{display:"flex", fontSize:"1.5rem", width: "6rem"}}>{coupon.productKey || getText("none", language)}</span>
           <span style={{display:"flex", fontSize:"1.5rem", width:"12rem", flexGrow: 1}}>{coupon.reward}</span>
