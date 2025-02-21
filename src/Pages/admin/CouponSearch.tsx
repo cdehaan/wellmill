@@ -8,10 +8,12 @@ const token = window.location.search ? new URLSearchParams(window.location.searc
 type CouponSearchProps = {
   language: string;
   setShowSearchCoupons: (showSearchCoupons: boolean) => void;
+  code?: string;
 };
 
-export default function CouponSearch({ language, setShowSearchCoupons }: CouponSearchProps) {
-  const [searchString, setSearchString] = useState<string>("");
+export default function CouponSearch({ language, setShowSearchCoupons, code }: CouponSearchProps) {
+  const initialCode = code || "";
+  const [searchString, setSearchString] = useState<string>(initialCode);
   const [searchResults, setSearchResults] = useState<CouponType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [activeCoupon, setActiveCoupon] = useState<CouponType | null>(null);
