@@ -123,6 +123,9 @@ export function ProductProvider({ children }: ProductProviderProps) {
         type: Number(rawCoupon.type),
         target: Number(rawCoupon.target),
         reward: Number(rawCoupon.reward),
+        maxUses: rawCoupon.maxUses ? Number(rawCoupon.maxUses) : 0,
+        used: rawCoupon.used ? Number(rawCoupon.used) : 0,
+        lastUsed: rawCoupon.lastUsed ? String(rawCoupon.lastUsed) : "",
       };
 
       return coupon;

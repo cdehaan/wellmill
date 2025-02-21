@@ -117,6 +117,9 @@ export type CouponType = {
     target: number,
     reward: number,
     code?: string, // This is a secret, never sent to the customer
+    maxUses: number | null,
+    used: number | null,
+    lastUsed: string | null,
 }
 
 export type CouponGroupType = {
