@@ -75,6 +75,9 @@ export default function CouponSearch({ language, setShowSearchCoupons }: CouponS
   }
 
   async function handleDeleteClick(couponKey: number) {
+    const confirmed = window.confirm("Are you sure you want to delete this coupon?");
+    if (!confirmed) return;
+
     setErrorMessage("");
     setIsLoading(true);
 
