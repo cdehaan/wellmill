@@ -15,10 +15,12 @@ export default function CouponSearch({ language, setShowSearchCoupons }: CouponS
   const [searchResults, setSearchResults] = useState<CouponType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [activeCoupon, setActiveCoupon] = useState<CouponType | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   async function handleSearch() {
     setIsLoading(true);
     setSearchResults([]);
+    setErrorMessage("");
     const requestBody = {
       token: token,
       searchString: searchString,
@@ -33,15 +35,43 @@ export default function CouponSearch({ language, setShowSearchCoupons }: CouponS
   }
 
   function handleEditClick(coupon: CouponType) {
+    setErrorMessage("");
     setActiveCoupon(activeCoupon?.couponKey === coupon.couponKey ? null : coupon);
-  }
-
-  function handleSaveClick() {
-    console.log(activeCoupon);
   }
 
   function handleCancelClick() {
     setActiveCoupon(null);
+  }
+
+  async function handleSaveClick() {
+    if (!activeCoupon) return;
+    setErrorMessage("");
+    
+    const requestBody = {
+      token,
+      coupon: {
+        couponKey: activeCoupon.couponKey,
+        code: activeCoupon.code,
+        productKey: activeCoupon.productKey,
+        type: activeCoupon.type,
+        target: activeCoupon.target,
+        reward: activeCoupon.reward,  
+      }
+    };
+    
+    try {
+      const response = await CallAPI(requestBody, 'adminCouponUpdate');
+      if (response.error === null) {
+        setIsLoading(true);
+        setActiveCoupon(null);
+        await handleSearch();
+        setIsLoading(false);
+      } else {
+        setErrorMessage("Error updating coupon: " + response.error);
+      }
+    } catch (error) {
+      setErrorMessage("Error updating coupon:" + error);
+    }
   }
 
   function handleActiveCouponChange(newValue: string | number, field: keyof CouponType) {
@@ -67,6 +97,7 @@ export default function CouponSearch({ language, setShowSearchCoupons }: CouponS
     <div className="couponSearchCover">
       <div className='couponSearchModal'>
         <h1>Coupon Search</h1>
+        {errorMessage && <p className="errorMessage">{errorMessage}</p>}
         <div className='couponSearchInput'>
           <input
             type="text"
