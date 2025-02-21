@@ -17,18 +17,23 @@ export default async function CallAPI(data:object, endpoint: string, filename?: 
 
     if (!response.ok) {
       // Attempt to parse the error message from the response
+      const responseClone = response.clone();
+
       try {
           const errorDataJson = await response.json();
+          console.log("Error in CallAPI in json");
           console.log(errorDataJson);
           return { data: null, error: errorDataJson.error || `HTTP error. Status: ${response.status}` };
       } catch (jsonParseError) {
         try{
           // If didn't find Json error data, look for a text error message
-          const errorDataText = await response.text();
-          console.log(errorDataText);
+          const errorDataText = await responseClone.text();
+          //console.log("Error in CallAPI in text");
+          //console.log(errorDataText);
           return { data: null, error: errorDataText };
         } catch (textParseError){
           // If parsing json AND text fails, return a generic error message
+          console.log("Error in CallAPI raw data");
           console.log(response);
           return { data: null, error: `HTTP error! Status: ${response.status}` };
         }

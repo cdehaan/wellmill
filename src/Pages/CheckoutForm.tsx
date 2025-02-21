@@ -98,6 +98,7 @@ export default function CheckoutForm({ setDisplayCheckout, addressesState }: Che
   }, [stripe]);
 
   async function HandleCouponClick() {
+    setCouponError(null);
     if(!user) {
       console.log("User is not defined when trying to apply a coupon.");
       return;
@@ -145,8 +146,11 @@ export default function CheckoutForm({ setDisplayCheckout, addressesState }: Che
 
     const CallAPIResponse = await CallAPI(updateIntentData, "updatePaymentIntent");
     if (CallAPIResponse.error) {
-      console.error("API error:", CallAPIResponse.error);
+      //console.error("API error:", CallAPIResponse.error);
       setCouponError(CallAPIResponse.error);
+      setTimeout(() => {
+        setCouponError(null);
+      }, 5000);
       return;
     }
     const couponDiscount = CallAPIResponse?.data?.couponDiscount || 0;
@@ -399,6 +403,7 @@ export default function CheckoutForm({ setDisplayCheckout, addressesState }: Che
       <span>クーポン</span>
       <input type="text" value={couponCode || ""} className={styles.couponInput} onChange={(e) => { setCouponCode(e.target.value) }} />
       <button className={styles.couponButton} onClick={HandleCouponClick}>適用</button>
+      <span style={{position:"absolute", bottom:0, right: "0.5rem", color:"#800", fontWeight:"bold"}}>{couponError}</span>
     </div>
     </>
   ) : null;

@@ -694,7 +694,7 @@ export const useUserData = (): UseUserDataReturnType => {
 
     if(APIResponse.error) {
       console.log("Error in createPaymentIntent in useUserData:");
-      console.log(APIResponse);
+      console.log(APIResponse.error);
       return APIResponse;
     }
 
