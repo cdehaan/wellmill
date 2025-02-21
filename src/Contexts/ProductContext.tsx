@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { Coupon, Product } from '../types';
+import { CouponType, ProductType } from '../types';
 
 type ProductContextType = {
-  products: Product[] | undefined;
-  setProducts: React.Dispatch<React.SetStateAction<Product[] | undefined>>;
+  products: ProductType[] | undefined;
+  setProducts: React.Dispatch<React.SetStateAction<ProductType[] | undefined>>;
   isLoading: boolean;
   error: string | null;
 };
@@ -24,7 +24,7 @@ type ProductProviderProps = {
 };
 
 export function ProductProvider({ children }: ProductProviderProps) {
-  const [products, setProducts] = useState<Product[] | undefined>(undefined);
+  const [products, setProducts] = useState<ProductType[] | undefined>(undefined);
   const [isLoading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -92,9 +92,9 @@ export function ProductProvider({ children }: ProductProviderProps) {
     return () => { isMounted = false; };
   }, [products]); // Only used to check if it already exists. If yes, don't download data again.
 
-  function transformProductData(rawData: any[]): Product[] {
+  function transformProductData(rawData: any[]): ProductType[] {
     return rawData.map((rawProduct) => {
-      const product: Product = {
+      const product: ProductType = {
         productKey: Number(rawProduct.productKey) || 0,
         id: String(rawProduct.id),
         title: String(rawProduct.title),
@@ -114,9 +114,9 @@ export function ProductProvider({ children }: ProductProviderProps) {
     });
   }
 
-  function transformCoupons(rawData: any[]): Coupon[] {
+  function transformCoupons(rawData: any[]): CouponType[] {
     return rawData.map((rawCoupon) => {
-      const coupon: Coupon = {
+      const coupon: CouponType = {
         couponKey: Number(rawCoupon.couponKey),
         productKey: Number(rawCoupon.productKey),
         hash: String(rawCoupon.hash),

@@ -1,12 +1,12 @@
-import { Cart, CartLine, Customer } from "../types";
+import { CartType, CartLineType, CustomerType } from "../types";
 
-export default function ProcessCustomer(customer: Customer):Customer {
+export default function ProcessCustomer(customer: CustomerType):CustomerType {
   const newCustomer = { ...customer }
   newCustomer.cart = ProcessCart(newCustomer.cart);
   return newCustomer;
 }
 
-function ProcessCart(data:Cart|CartLine[]):Cart {
+function ProcessCart(data:CartType|CartLineType[]):CartType {
 
   let newLines;
   if (Array.isArray(data) && data.every(item => item.type === "cartLine")) {
@@ -17,7 +17,7 @@ function ProcessCart(data:Cart|CartLine[]):Cart {
     throw new Error(`Invalid input to ProcessCart: ${data}`);
   }
 
-  const updatedCartLines:CartLine[] = newLines.map(line => {
+  const updatedCartLines:CartLineType[] = newLines.map(line => {
     // Cast then validate relevant values to numbers
     const quantity = parseInt(line.quantity.toString());
     const unitPrice = parseFloat(line.unitPrice.toString());

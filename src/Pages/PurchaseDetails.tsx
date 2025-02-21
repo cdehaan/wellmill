@@ -9,7 +9,7 @@ import styles from "./purchaseDetails.module.css"
 import Header from "./Header";
 import Footer from "./Footer";
 import { useNavigate, useParams } from "react-router-dom";
-import { Address } from "../types";
+import { AddressType } from "../types";
 import { Helmet } from "react-helmet";
 
 const breadcrumbs = [
@@ -161,7 +161,7 @@ export default function PurchaseDetails() {
     }
   }
 
-  const uniqueAddresses:Address[] = [];
+  const uniqueAddresses:AddressType[] = [];
   const seen = new Set();
   lineItems.forEach(line => {
     const addressKey = [ line.firstName, line.lastName, line.postalCode, line.prefCode, line.pref, line.city, line.ward, line.address2, line.phoneNumber].join('|');

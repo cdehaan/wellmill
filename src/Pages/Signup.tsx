@@ -1,7 +1,7 @@
 import React, { ChangeEvent, useState } from "react";
 import { useUserData } from '../Hooks/useUserData';
 import Header from "./Header";
-import { Customer } from "../types";
+import { CustomerType } from "../types";
 
 import styles from './signup.module.css'
 import Footer from "./Footer";
@@ -194,7 +194,7 @@ function Signup() {
       alert('すべての項目を入力してください');
       return;
     }
-    const userData: Customer = {
+    const userData: CustomerType = {
       type: 'customer',
       token: inputs.token,
       email: inputs.email,

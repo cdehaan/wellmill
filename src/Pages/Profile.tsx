@@ -8,7 +8,7 @@ import Footer from "./Footer";
 import { UserContext } from "../Contexts/UserContext";
 import { useUserData } from '../Hooks/useUserData';
 import { useBackupDB } from "../Hooks/useBackupDB";
-import { Customer } from "../types";
+import { CustomerType } from "../types";
 import Cookies from "js-cookie";
 
 const breadcrumbs = [
@@ -155,7 +155,7 @@ function Profile() {
     }
     //console.log("got everything")
 
-    const userData: Customer = {
+    const userData: CustomerType = {
       type: 'customer',
       lastName: inputs.lastName,
       firstName: inputs.firstName,
@@ -230,7 +230,7 @@ function Profile() {
     }
 
     // TODO need a better way to send password updates
-    const userData: Customer = {
+    const userData: CustomerType = {
       type: 'customer',
       customerKey: user.customerKey,
       password: inputs.password,

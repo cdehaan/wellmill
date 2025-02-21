@@ -8,7 +8,7 @@ import styles from "./orderList.module.css"
 import Header from "./Header";
 import Footer from "./Footer";
 import { Link } from "react-router-dom";
-import { Purchase } from "../types";
+import { PurchaseType } from "../types";
 
 const breadcrumbs = [
   { text: "ホーム", url: "/" },
@@ -21,7 +21,7 @@ function OrderList() {
   //const { products, isLoading: productsLoading, error: productsError } = useProducts();
   console.log(user);
 
-  const purchases: Purchase[] = user ? user.purchases : []
+  const purchases: PurchaseType[] = user ? user.purchases : []
 
   const noPurchasesMessage = (purchases?.length === 0) ? (<span className={styles.listMessage}>購入履歴はありません</span>) : null;
   const quantityMessage = <span className={styles.listMessage}>Purchases Quantity: {purchases?.length}</span>;

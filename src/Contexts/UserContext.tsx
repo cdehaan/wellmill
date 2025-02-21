@@ -1,5 +1,5 @@
 import { createContext, useState, Dispatch, SetStateAction, useEffect } from 'react';
-import { Cart, Customer, emptyCustomer } from '../types';
+import { CartType, CustomerType, emptyCustomer } from '../types';
 import CallAPI from '../Utilities/CallAPI';
 import ProcessCustomer from '../Utilities/ProcessCustomer';
 import Cookies from 'js-cookie';
@@ -10,8 +10,8 @@ type UserProviderProps = {
 };
 
 type UserContextValue = {
-  user: Customer | null;
-  setUser: Dispatch<SetStateAction<Customer | null>>;
+  user: CustomerType | null;
+  setUser: Dispatch<SetStateAction<CustomerType | null>>;
   cartLoading: boolean;
   setCartLoading: Dispatch<SetStateAction<boolean>>;
   userLoading: boolean;
@@ -50,7 +50,7 @@ const defaultContextValue: UserContextValue = {
 export const UserContext = createContext<UserContextValue>(defaultContextValue);
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<Customer | null>(null);
+  const [user, setUser] = useState<CustomerType | null>(null);
   const [cartLoading, setCartLoading] = useState<boolean>(false);
   const [userLoading, setUserLoading] = useState(false);
   const [userMeaningful, setUserMeaningful] = useState(false);
@@ -109,7 +109,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
     function pullUserLocal() {
       const localStorageUser = localStorage.getItem('userLocal')
-      let userLocal = (localStorageUser ? JSON.parse(localStorageUser) : emptyCustomer) as Customer;
+      let userLocal = (localStorageUser ? JSON.parse(localStorageUser) : emptyCustomer) as CustomerType;
       setUser(userLocal);
     }
   }, [user]);
@@ -154,7 +154,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     const cartTax = Math.round(lines.reduce((sum, lineItem) => sum + (lineItem.unitPrice * (lineItem.taxRate) * lineItem.quantity), 0));
 
     if(cart.quantity !== cartQuantity || cart.cost !== cartCost || cart.includedTax !== cartTax) {
-      const newCart: Cart = {
+      const newCart: CartType = {
         type: "cart",
         quantity: cartQuantity,
         cost: cartCost,

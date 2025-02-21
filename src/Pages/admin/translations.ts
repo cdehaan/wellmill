@@ -42,8 +42,8 @@ const translations = [
     { id: "addresses", en: "Addresses", jp: "住所" },
     { id: "products", en: "Products", jp: "商品" },
     { id: "images", en: "Images", jp: "画像" },
-    { id: "coupons", en: "Coupons", jp: "クーポン" },
-    { id: "coupongroups", en: "Coupon Groups", jp: "クーポングループ" },
+    { id: "coupons", en: "Coupons", jp: "個別クーポン" },
+    { id: "coupongroups", en: "Coupon Groups", jp: "クーポン束" },
 
 
 
@@ -171,6 +171,7 @@ const translations = [
 
     /* Bulk coupons / coupon groups */
     { id: "addCouponGroup", en: "Create coupon group", jp: "クーポングループを追加" },
+    { id: "searchCoupons", en: "Search coupons", jp: "クーポンを検索" },
     { id: "couponGroupName", en: "Group name", jp: "グループ名" },
     { id: "couponGroupNamePlaceholder", en: "Fall", jp: "Fall" },
     { id: "couponGroupNameRules", en: "Only English characters can be used. This won't be seen by the customer.", jp: "英語の文字のみ使用可能。これは顧客には表示されません。" },

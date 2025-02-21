@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { UserContext } from "../Contexts/UserContext";
 import { useUserData } from "../Hooks/useUserData";
 
-import { Address } from "../types";
+import { AddressType } from "../types";
 
 import styles from "./newAddress.module.css"
 import '../App.css';
@@ -20,7 +20,7 @@ export default function NewAddress({ addressKey, setShowNewAddress }: NewAddress
   const [postalCode, setPostalCode] = useState<string>("");
   const [displayedPostalCode, setDisplayedPostalCode] = useState<string>("");
   const postalCodeRef = useRef(null);
-  const [address, setAddress] = useState<Address>({defaultAddress: false});
+  const [address, setAddress] = useState<AddressType>({defaultAddress: false});
   const [fetchingAddress, setFetchingAddress] = useState<Boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -75,16 +75,16 @@ export default function NewAddress({ addressKey, setShowNewAddress }: NewAddress
 
         // Successful fetch of data, but no results found. Empty the address fields. TODO should not do this if user has edited the fields.
         if(data.results === null || data.results.length === 0) {
-          setAddress( (previousAddress: Address) => ({ ...previousAddress, pref: "", city: "", ward: "" }) );
+          setAddress( (previousAddress: AddressType) => ({ ...previousAddress, pref: "", city: "", ward: "" }) );
           return;
         }
 
         const result = data.results[0];
         //console.log(result);
 
-        if (result.prefcode) { setAddress( (previousAddress: Address) => ({ ...previousAddress, prefCode: result.prefcode }) ); }
-        if (result.address2) { setAddress( (previousAddress: Address) => ({ ...previousAddress, city:     result.address2 }) ); }
-        if (result.address3) { setAddress( (previousAddress: Address) => ({ ...previousAddress, ward:     result.address3 }) ); }
+        if (result.prefcode) { setAddress( (previousAddress: AddressType) => ({ ...previousAddress, prefCode: result.prefcode }) ); }
+        if (result.address2) { setAddress( (previousAddress: AddressType) => ({ ...previousAddress, city:     result.address2 }) ); }
+        if (result.address3) { setAddress( (previousAddress: AddressType) => ({ ...previousAddress, ward:     result.address3 }) ); }
 
       } else {
         // Handle invalid response or no results
@@ -142,7 +142,7 @@ export default function NewAddress({ addressKey, setShowNewAddress }: NewAddress
 
   function handleAddressChange(field: string, newValue: string | boolean) {
     setErrorMessage(null);
-    setAddress( (previousAddress: Address) => ({ ...previousAddress, [field]: newValue }) );
+    setAddress( (previousAddress: AddressType) => ({ ...previousAddress, [field]: newValue }) );
   }
 
   function sanitizePhoneNumber() {
@@ -161,7 +161,7 @@ export default function NewAddress({ addressKey, setShowNewAddress }: NewAddress
     // Remove non-numbers, dashes, dots, or spaces
     newPhoneNumber = newPhoneNumber.replace(/[^0-9\-.\s]/g, "");
     
-    setAddress( (previousAddress: Address) => ({ ...previousAddress, phoneNumber: newPhoneNumber }) );
+    setAddress( (previousAddress: AddressType) => ({ ...previousAddress, phoneNumber: newPhoneNumber }) );
   }
 
 

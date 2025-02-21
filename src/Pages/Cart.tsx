@@ -10,7 +10,7 @@ import styles from './cart.module.css'
 import Header from "./Header";
 import Footer from "./Footer";
 import Checkout from "./Checkout";
-import { LineItemAddressesArray, LineItemAddresses } from "../types";
+import { LineItemAddressesArray, LineItemAddressesType } from "../types";
 import NewAddress from "./NewAddress";
 import { prefectures } from "../Utilities/addressData";
 
@@ -319,7 +319,7 @@ export default function Cart() {
 
               // If quantity is 1, create a single address object
               if (lineItem.quantity === 1) {
-                const returnedLineItem:LineItemAddresses = {
+                const returnedLineItem:LineItemAddressesType = {
                   ...lineItem,
                   quantity: 1,
                   addresses: [{ addressKey: addresses[0]?.addressKey || null, quantity: 1, addressIndex: 1 }]
@@ -329,7 +329,7 @@ export default function Cart() {
 
               // If quantity is 2 or more, create two address objects
               else if (lineItem.quantity && lineItem.quantity > 1) {
-                const returnedLineItem:LineItemAddresses = {
+                const returnedLineItem:LineItemAddressesType = {
                   ...lineItem,
                   quantity: lineItem.quantity,
                   addresses: [

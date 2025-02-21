@@ -7,7 +7,7 @@ import { useProducts } from "../Contexts/ProductContext";
 
 import CallAPI from '../Utilities/CallAPI';
 
-import { Customer, UserCredentials, Cart, CartLine, Address, Product, LineItemAddressesArray, LineItem, Purchase, Image, emptyCustomer } from '../types';
+import { CustomerType, UserCredentials, CartType, CartLineType, AddressType, ProductType, LineItemAddressesArray, LineItemType, PurchaseType, ImageType, emptyCustomer } from '../types';
 import ProcessCustomer from '../Utilities/ProcessCustomer';
 import { prefectures } from '../Utilities/addressData';
 
@@ -18,19 +18,19 @@ type APIResponse = {
 };
 
 type UseUserDataReturnType = {
-  createUser: (userData: Customer) => Promise<APIResponse>;
-  updateUser: (userData: Customer) => Promise<APIResponse>;
+  createUser: (userData: CustomerType) => Promise<APIResponse>;
+  updateUser: (userData: CustomerType) => Promise<APIResponse>;
   registerGuest: () => Promise<APIResponse>;
   loginUser: (credentials: UserCredentials) => Promise<APIResponse>;
   logoutUser: () => boolean;
-  addAddress: (address: Address) => Promise<APIResponse>;
+  addAddress: (address: AddressType) => Promise<APIResponse>;
   deleteAddress: (addressKey: number) => Promise<APIResponse>;  
 
-  addToCart: (productKey: number, quantity: number, explicitUser? : Customer) => Promise<APIResponse>;
+  addToCart: (productKey: number, quantity: number, explicitUser? : CustomerType) => Promise<APIResponse>;
   updateCartQuantity: (lineItemKey: number, quantity: number) => Promise<APIResponse>;
   deleteFromCart: (lineItemKey: number) => Promise<APIResponse>;
 
-  createPaymentIntent: (cartLines: CartLine[], addressesState: LineItemAddressesArray) => Promise<APIResponse>;
+  createPaymentIntent: (cartLines: CartLineType[], addressesState: LineItemAddressesArray) => Promise<APIResponse>;
   finalizePurchase: (paymentIntentId: string, email: string, billingAddressKey: number) => Promise<APIResponse>;
   cancelPurchase: (purchaseKey: number) => Promise<APIResponse>;
   printReceipt: (purchaseKey: number) => Promise<APIResponse>;
@@ -46,7 +46,7 @@ export const useUserData = (): UseUserDataReturnType => {
   const { products, isLoading: productsLoading, error: productsError } = useProducts();
   const {backupCustomerData, data: customerBackupData, error: customerBackupError} = useBackupDB<any>();
 
-  const createUser = async (userData: Customer): Promise<APIResponse> => {
+  const createUser = async (userData: CustomerType): Promise<APIResponse> => {
     setUserLoading(true);
     const APIResponse = await CallAPI(userData, "createUser");
     //console.log("APIResponse after create API call:");
@@ -76,7 +76,7 @@ export const useUserData = (): UseUserDataReturnType => {
     return { data: APIResponse.data, error: null };  
   };
 
-  const updateUser = async (userData: Customer): Promise<APIResponse> => {
+  const updateUser = async (userData: CustomerType): Promise<APIResponse> => {
     setUserLoading(true);
     const APIResponse = await CallAPI({...userData, customerKey: user?.customerKey, token: user?.token}, "updateUser");
 
@@ -170,13 +170,13 @@ export const useUserData = (): UseUserDataReturnType => {
 
   //#region Add address
   // Add can also be used to update, if an addressKey is present in the address data
-  async function addAddress(address: Address) {
+  async function addAddress(address: AddressType) {
     setUserLoading(true);
     const addAddressResults = addAddressFunction(address);
     setUserLoading(false);
     return addAddressResults;
 
-    async function addAddressFunction(address: Address) {
+    async function addAddressFunction(address: AddressType) {
       if(!user?.customerKey) {
         return addAddressLocal(address);
       }
@@ -208,7 +208,7 @@ export const useUserData = (): UseUserDataReturnType => {
     }
   }
 
-  const addAddressLocal = useCallback((address: Address) => {
+  const addAddressLocal = useCallback((address: AddressType) => {
     if(!user) return { data: null, error: "No user data available when adding local address" };
 
     // Take the prefecture's code, a number, and fill in the text
@@ -313,7 +313,7 @@ export const useUserData = (): UseUserDataReturnType => {
 
 
   //#region Add to cart
-  const addToCart = useCallback(async (productKey: number, quantity: number, explicitUser? : Customer ) => {
+  const addToCart = useCallback(async (productKey: number, quantity: number, explicitUser? : CustomerType ) => {
     setCartLoading(true);
     if(explicitUser) {
       //console.log("Explicit user in addToCart in useUserData:");
@@ -324,7 +324,7 @@ export const useUserData = (): UseUserDataReturnType => {
     setCartLoading(false);
     return updatedCart;
 
-    async function addToCartFunction(productKey: number, quantity: number, currentUser: Customer | null) {
+    async function addToCartFunction(productKey: number, quantity: number, currentUser: CustomerType | null) {
       if(!currentUser) return { data: null, error: "No user data available when adding to cart" };
       const product = products?.find(product => {return product.productKey === productKey});
       if(!product) {
@@ -358,7 +358,7 @@ export const useUserData = (): UseUserDataReturnType => {
     }
   }, [products, guest, user]);
 
-  const addToCartLocal = useCallback((product: Product, quantity: number) => {
+  const addToCartLocal = useCallback((product: ProductType, quantity: number) => {
     // No cart or no lines is ok for add to cart
     if(!user) return { data: null, error: "No user data available when adding to local cart" };
 
@@ -494,7 +494,7 @@ export const useUserData = (): UseUserDataReturnType => {
   //#endregion
 
 
-  function UpdateCartMetadata(cart: Cart) {
+  function UpdateCartMetadata(cart: CartType) {
     const newCart = {...cart};
     const lines = newCart.lines;
     if(!lines) return cart;
@@ -514,7 +514,7 @@ export const useUserData = (): UseUserDataReturnType => {
 
 
 
-  const createPaymentIntent = useCallback(async (cartLines: CartLine[], addressesState: LineItemAddressesArray) => {
+  const createPaymentIntent = useCallback(async (cartLines: CartLineType[], addressesState: LineItemAddressesArray) => {
     setCartLoading(true);
     const subdomain = window.location.hostname.split('.')[0];
     const keyName = subdomain === 'stage' ? 'paymentIntentIdStage' : 'paymentIntentId';
@@ -528,7 +528,7 @@ export const useUserData = (): UseUserDataReturnType => {
     // let APIResponse;
     // let purchaseKey: number;
 
-    async function createPaymentIntentFunction(cartLines: CartLine[], addressesState: LineItemAddressesArray) {
+    async function createPaymentIntentFunction(cartLines: CartLineType[], addressesState: LineItemAddressesArray) {
       let APIResponse;
       let purchaseKey: number;
 
@@ -571,7 +571,7 @@ export const useUserData = (): UseUserDataReturnType => {
       const defaultAddress = user.addresses.find(addr => {return addr.defaultAddress === true}) || (user.addresses.length > 0 && user.addresses[0]) || null;
 
 
-      const lineItems: LineItem[] = [];
+      const lineItems: LineItemType[] = [];
       cartLines.forEach(cartLine => {
         const addressData = addressesState.find(addrSt => {return addrSt.lineItemKey === cartLine.lineItemKey});
         if(!addressData) { return {data: null, error: `addressData for lineItemKey: ${cartLine.lineItemKey} not found`}; }
@@ -579,7 +579,7 @@ export const useUserData = (): UseUserDataReturnType => {
         // Addresses for this item are not split up
         if(addressData.addresses === null) {
           //if(!defaultAddress || !defaultAddress.addressKey) { return {data: null, error: `No default address and no specific address for lineItemKey: ${cartLine.lineItemKey}`}; }
-          const newLineItem: LineItem = {
+          const newLineItem: LineItemType = {
             type: "lineItem",
             lineItemKey: cartLine.lineItemKey,
             productKey: cartLine.productKey,
@@ -608,7 +608,7 @@ export const useUserData = (): UseUserDataReturnType => {
           addressData.addresses.forEach(addrData => {
             const address = user.addresses.find(addr => {return addr.addressKey === addrData.addressKey })
             if(!address || !address.addressKey) { return {data: null, error: `address for addressData addressKey: ${addrData.addressKey} not found`}; }
-            const newLineItem: LineItem = {
+            const newLineItem: LineItemType = {
               type: "lineItem",
               lineItemKey: cartLine.lineItemKey,
               productKey: cartLine.productKey,
@@ -635,7 +635,7 @@ export const useUserData = (): UseUserDataReturnType => {
       });
 
       // make purchase in user "purchase array, include my paymentIntentId + amount"
-      const newPurchase: Purchase = {
+      const newPurchase: PurchaseType = {
         purchaseKey: purchaseKey,
         customerKey: null,
         status: "created",
@@ -654,7 +654,7 @@ export const useUserData = (): UseUserDataReturnType => {
         cartLines: [],
       }
 
-      const userClone: Customer = JSON.parse(JSON.stringify(user));
+      const userClone: CustomerType = JSON.parse(JSON.stringify(user));
       userClone.purchases.push(newPurchase);
       UpdateUser(userClone);
       localStorage.setItem('userLocal', JSON.stringify(userClone));
@@ -664,7 +664,7 @@ export const useUserData = (): UseUserDataReturnType => {
     }
   }, [guest, user])
 
-  const createPaymentIntentLocal = useCallback(async (cartLines: CartLine[], addressesState: LineItemAddressesArray) => {
+  const createPaymentIntentLocal = useCallback(async (cartLines: CartLineType[], addressesState: LineItemAddressesArray) => {
     const requestBody = {cartLines: cartLines, addressesState: addressesState, guest: guest};
     const APIResponse = await CallAPI(requestBody, "createPaymentIntent");
     if(APIResponse.error) {
@@ -888,7 +888,7 @@ export const useUserData = (): UseUserDataReturnType => {
 
     // Now that the purchase is finished, the cart must be emptied.
     // Whatever was in the cart is represented in the purchase
-    const userClone: Customer = JSON.parse(JSON.stringify(user));
+    const userClone: CustomerType = JSON.parse(JSON.stringify(user));
     userClone.cart.lines = [];
     UpdateUser(userClone);
     localStorage.setItem('userLocal', JSON.stringify(userClone));
@@ -948,10 +948,10 @@ export const useUserData = (): UseUserDataReturnType => {
    * 
    * @param newData - The new data to update the user. This can be a Customer, a Cart, or an array of CartLine.
    */
-  function UpdateUser(newData:(Customer | Cart | CartLine[])) {
-    setUser((previousUser: Customer | null) => {
+  function UpdateUser(newData:(CustomerType | CartType | CartLineType[])) {
+    setUser((previousUser: CustomerType | null) => {
 
-      let newUser: Customer;
+      let newUser: CustomerType;
 
       if (!Array.isArray(newData) && newData.type === 'customer') {
         newUser = {...newData};

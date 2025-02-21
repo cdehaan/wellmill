@@ -1,9 +1,9 @@
 import React from "react";
 import styles from './productTile.module.css'
 import { Link } from "react-router-dom";
-import { Product } from "../types";
+import { ProductType } from "../types";
 
-interface ProductTileProps { Product: Product; }
+interface ProductTileProps { Product: ProductType; }
 
 function ProductTile({ Product: product }: ProductTileProps) {
     if(!product) { return null; }

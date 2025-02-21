@@ -10,7 +10,7 @@ import { useProducts } from "../Contexts/ProductContext";
 import { prefectures } from "../Utilities/addressData"
 import styles from './checkoutForm.module.css';
 import NewAddress from "./NewAddress";
-import { Coupon, LineItemAddressesArray } from "../types";
+import { CouponType, LineItemAddressesArray } from "../types";
 import CallAPI from "../Utilities/CallAPI";
 
 type CheckoutFormProps = {
@@ -184,7 +184,7 @@ export default function CheckoutForm({ setDisplayCheckout, addressesState }: Che
 
     const keyName = subdomain === 'stage' ? 'couponsStage' : 'coupons';
     const currentCoupons = user.coupons.length > 0 ? user.coupons : JSON.parse(localStorage.getItem(keyName) || "[]");
-    const coupon = currentCoupons.find((coupon: Coupon) => {return coupon.hash === couponCodeHash});
+    const coupon = currentCoupons.find((coupon: CouponType) => {return coupon.hash === couponCodeHash});
     if(!coupon) {
       console.log("Coupon not found in currentCoupons.");
       console.log(currentCoupons);

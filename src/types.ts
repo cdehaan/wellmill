@@ -24,7 +24,7 @@ export type WellMillAzureAddress = {
 
 
 //#region Product
-export type Product = {
+export type ProductType = {
     productKey: number,
     id: string,
     title: string,
@@ -36,12 +36,12 @@ export type Product = {
     discountRate: number | null,
     discountValue: number | null,
     type: number,
-    images: Image[],
-    coupons?: Coupon[],
+    images: ImageType[],
+    coupons?: CouponType[],
     productOrder: number,
 }
 
-export type Image = {
+export type ImageType = {
     imageKey: number,
     productKey: number,
     url: string,
@@ -53,7 +53,7 @@ export type Image = {
 
 
 //#region Customer/User, Cart, Address
-export const emptyCustomer:Customer = {
+export const emptyCustomer:CustomerType = {
     type: 'customer',
     customerKey: null,
     cart: {
@@ -68,7 +68,7 @@ export const emptyCustomer:Customer = {
     coupons: [],
 }
 
-export type Customer = {
+export type CustomerType = {
     type: "customer",
     guest?: boolean,
     customerKey?: number | null, // For my MySQL database (null means its stored locally, undefined means not yet sent to server)
@@ -85,21 +85,21 @@ export type Customer = {
     newPassword1?: string, // TODO this should change or be removed, it's a poor way to do password updates
     newPassword2?: string,
     token?: string,
-    cart: Cart,
-    addresses: Address[],
-    purchases: Purchase[],
-    coupons: Coupon[],
+    cart: CartType,
+    addresses: AddressType[],
+    purchases: PurchaseType[],
+    coupons: CouponType[],
 }
 
-export type Cart = {
+export type CartType = {
     type: 'cart',
     quantity: number,
     cost: number,
     includedTax: number,
-    lines: CartLine[],
+    lines: CartLineType[],
 }
 
-export type CartLine = {
+export type CartLineType = {
     type: 'cartLine',
     lineItemKey: number,
     productKey: number,
@@ -109,7 +109,7 @@ export type CartLine = {
     purchaseKey?: number, // On checkout screen, after paymentIntentId has been made
 }
 
-export type Coupon = {
+export type CouponType = {
     couponKey: number,
     productKey: number | null,
     hash: string,
@@ -119,7 +119,7 @@ export type Coupon = {
     code?: string, // This is a secret, never sent to the customer
 }
 
-export type CouponGroup = {
+export type CouponGroupType = {
     name: string,
     couponGroupKey: number,
     active: boolean,
@@ -142,7 +142,7 @@ export type CouponGroup = {
 
 //#region Address, Address state (used for multiple addresses for one type of item in a purchase)
 // All are optional, if any one of them is missing, it's still a reasonable address (inside the system)
-export type Address = {
+export type AddressType = {
     addressKey?: number | null, // Given by MySQL - null just means we're sure this address doesn't have a key yet
     customerKey?: number | null,
     lastName?: string, //"デハーン",
@@ -158,12 +158,12 @@ export type Address = {
     defaultAddress?: boolean, // true
 }
 
-export type LineItemAddressesArray = LineItemAddresses[];
+export type LineItemAddressesArray = LineItemAddressesType[];
 
-export type LineItemAddresses = {
+export type LineItemAddressesType = {
     lineItemKey: number;
     quantity: number;
-    addresses: LineItemAddress[] | null;
+    addresses: LineItemAddressType[] | null;
 };
 
 /**
@@ -174,7 +174,7 @@ export type LineItemAddresses = {
  * @property {number} addressIndex - The order of the addresses in the array of addresses
  *   for split items from a lineItem that was originally a single entry. Not an address key.
  */
-type LineItemAddress = {
+type LineItemAddressType = {
     addressKey: number | null;
     quantity: number;
     addressIndex: number;
@@ -184,7 +184,7 @@ type LineItemAddress = {
 
 
 //#region Purchase and Line Item with address
-export type Purchase = {
+export type PurchaseType = {
     purchaseKey: number,
     customerKey: number | null,
     addressKey?: number, // billing address
@@ -200,11 +200,11 @@ export type Purchase = {
     couponCode: string | null,
     email: string | null,
     newPurchaseJson: string | null,
-    lineItems: LineItem[],
-    cartLines: CartLine[], // Array of CartLines exists while on the checkout screen, address not frozen yet
+    lineItems: LineItemType[],
+    cartLines: CartLineType[], // Array of CartLines exists while on the checkout screen, address not frozen yet
 }
 
-export type LineItem = {
+export type LineItemType = {
     type: "lineItem",
     lineItemKey: number,
     productKey: number,
@@ -254,12 +254,12 @@ export interface Breadcrumb {
 
 
 export type AdminDataType = {
-    customers: Customer[],
-    addresses: Address[],
-    purchases: Purchase[],
-    products: Product[],
-    coupons: Coupon[],
-    couponGroups: CouponGroup[],
-    images: Image[],
-    lineItems: LineItem[],
+    customers: CustomerType[],
+    addresses: AddressType[],
+    purchases: PurchaseType[],
+    products: ProductType[],
+    coupons: CouponType[],
+    couponGroups: CouponGroupType[],
+    images: ImageType[],
+    lineItems: LineItemType[],
   }

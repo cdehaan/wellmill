@@ -6,7 +6,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import { Appearance, StripeElementsOptions, loadStripe } from "@stripe/stripe-js";
 import { UserContext } from "../Contexts/UserContext";
 import { useUserData } from "../Hooks/useUserData";
-import { CartLine, LineItemAddressesArray } from "../types";
+import { CartLineType, LineItemAddressesArray } from "../types";
 
 
 type CheckoutProps = {
@@ -75,7 +75,7 @@ function Checkout({ setDisplayCheckout, addressesState }: CheckoutProps) {
       createPaymentIntentFunction(cartLines, addressesState);
     }
 
-    async function createPaymentIntentFunction(cartLines: CartLine[], addressesState: LineItemAddressesArray) {
+    async function createPaymentIntentFunction(cartLines: CartLineType[], addressesState: LineItemAddressesArray) {
       const response = await createPaymentIntent(cartLines, addressesState);
       if(response.error) {
         console.log("Error in createPaymentIntentFunction: " + response.error);

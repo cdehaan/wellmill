@@ -5,6 +5,7 @@ import CouponUsageChart from "../../Components/CouponUsageChart";
 import CallAPI from "../../Utilities/CallAPI";
 import csvIcon from "../../assets/images/csv-icon.png";
 import excelIcon from "../../assets/images/excel-icon.png";
+import CouponSearch from "./CouponSearch";
 
 type CouponGroupsProps = {
   adminData: AdminDataType | null;
@@ -48,6 +49,7 @@ const token = window.location.search ? new URLSearchParams(window.location.searc
 
 export default function CouponGroups({ adminData, loadAdminData, language }: CouponGroupsProps) {
   const [showAddCouponGroup, setShowAddCouponGroup] = useState<boolean>(false);   
+  const [showSearchCoupons, setShowSearchCoupons] = useState<boolean>(false);
   const [newCouponGroup, setNewCouponGroup] = useState<CouponGroupFields>(defaultCouponGroup);
   const [codeSourceRadioValue, setCodeSourceRadioValue] = useState<string>("generated"); // old value: "csv"
   const [csvCodes, setCsvCodes] = useState<string>("");
@@ -326,7 +328,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
 
   const couponTypes = [1, 2, 3, 5];
   const couponExplanationJp = (
-    <div style={{display: "inline-flex", flexDirection:"column", border:"1px solid #888", borderRadius: "0.5rem", padding: "0.5rem", margin: "0.5rem"}}>
+    <div style={{display: "inline-flex", flexDirection:"column", border:"1px solid #888", borderRadius: "0.5rem", padding: "0.5rem", margin: "0.5rem 0"}}>
       <span style={{fontSize:"1.5rem"}}>クーポンタイプの説明:</span>
       <div style={{display: "grid", gridTemplateColumns: "10rem 1fr"}}>
         {couponTypes.map((type) => (<><span style={{textAlign:"end", marginRight:"0.5rem", fontWeight: "bold"}}>{couponTypeName(type, "jp")}: </span><span>{couponTypeDescription(type, "X", "Y", null, "jp")}</span></>))}
@@ -346,6 +348,10 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
   //#region Add coupon group
   const addCouponGroupButton = (
     <button onClick={() => setShowAddCouponGroup(true)}>{getText("addCouponGroup", language)}</button>
+  );
+
+  const searchCouponGroupButton = (
+    <button onClick={() => setShowSearchCoupons(true)}>{getText("searchCoupons", language)}</button>
   );
 
   const minimumJumbleLength = calculateMinimumJumbleLength(newCouponGroup.quantity);
@@ -670,10 +676,13 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
   return (
     <div style={{padding: "0 1rem"}}>
       {showAddCouponGroup ? addCouponGroupModal : null}
+      {showSearchCoupons ? <CouponSearch language={language} setShowSearchCoupons={setShowSearchCoupons} /> : null}
       <h2>{getText("coupongroups", language)}</h2>
       {language === "jp" ? couponExplanationJp : language === "en" ? couponExplanationEn : "Unknown language"}
       <br />
-      {addCouponGroupButton}
+      <div style={{display: "flex", gap: "1rem"}}>
+        {addCouponGroupButton}{searchCouponGroupButton}
+      </div>
       <br />
       <span>{getText("totalCoupons", language)}: {totalCoupons}</span>
       {couponGroupTable}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AdminDataType, Product } from "../../types";
+import { AdminDataType, ProductType } from "../../types";
 import CallAPI from "../../Utilities/CallAPI";
 import { LanguageType, getText } from "./translations";
 
@@ -32,7 +32,7 @@ export default function Images({ adminData, loadAdminData, language }: ImagesPro
   const products = adminData?.products;
   if (!products) return <span>{getText("loadingProducts", language)}</span>;
 
-  const productKeys = new Set(products.map((product: Product) => product.productKey));
+  const productKeys = new Set(products.map((product: ProductType) => product.productKey));
   const unassociatedImages = images.filter((image: ImageFields) => (!image.productKey || !productKeys.has(image.productKey)));
 
   //#region Add image
@@ -102,7 +102,7 @@ export default function Images({ adminData, loadAdminData, language }: ImagesPro
     const productSelect = (
       <select onChange={(event) => handleProductSelectChange(event, image.imageKey)}>
         <option value="0">{getText("selectProduct", language)}</option>
-        {products.map((product: Product) => {
+        {products.map((product: ProductType) => {
           return (
             <option key={product.productKey} value={product.productKey}>{product.title}</option>
           )
@@ -122,7 +122,7 @@ export default function Images({ adminData, loadAdminData, language }: ImagesPro
   function handleProductSelectChange(event: React.ChangeEvent<HTMLSelectElement>, imageKey: number) {
     const productKey = parseInt(event.target.value);
     if (!productKey) return;
-    const product = products.find((product: Product) => product.productKey === productKey);
+    const product = products.find((product: ProductType) => product.productKey === productKey);
     if(!product) return;
 
     if (!window.confirm(`${getText("assignImageConfirm", language)}: ${product.title}?`)) return;

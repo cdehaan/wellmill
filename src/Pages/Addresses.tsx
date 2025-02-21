@@ -9,7 +9,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import NewAddress from "./NewAddress";
 
-import { Address } from "../types";
+import { AddressType } from "../types";
 import { prefectures } from "../Utilities/addressData"
 import { Link } from "react-router-dom";
 
@@ -42,7 +42,7 @@ function Addresses() {
 
   
 
-  function GenerateAddressBox(address: Address | undefined) {
+  function GenerateAddressBox(address: AddressType | undefined) {
     if(address === undefined) return null;
     const prefectureName = prefectures.find(prefecture => prefecture.code.toString() === address.pref)?.name;
     const addressKey = (address?.addressKey !== undefined) ? address.addressKey : null;

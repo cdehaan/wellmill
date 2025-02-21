@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AdminDataType, Customer } from "../../types";
+import { AdminDataType, CustomerType } from "../../types";
 import CallAPI from "../../Utilities/CallAPI";
 import { LanguageType, getText } from "./translations";
 
@@ -24,7 +24,7 @@ type CustomerFields = {
 type CustomerFieldKey = keyof CustomerFields;
 
 type customerSortField = {
-  fieldName: keyof Customer; // eg: 'customerKey'
+  fieldName: keyof CustomerType; // eg: 'customerKey'
   desc: boolean;
 };
 
@@ -61,7 +61,7 @@ export default function Customers({ adminData, loadAdminData, language }: Custom
 
   function handleSortClick(event: React.MouseEvent<HTMLSpanElement>) {
     if (!(event.target instanceof HTMLElement)) return;
-    const fieldName = event.target.getAttribute('data-name') as keyof Customer;
+    const fieldName = event.target.getAttribute('data-name') as keyof CustomerType;
     setCustomerSortField(prev => {
       if (prev.fieldName === fieldName) {
         return { ...prev, desc: !prev.desc };
