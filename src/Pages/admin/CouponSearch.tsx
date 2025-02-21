@@ -14,6 +14,7 @@ export default function CouponSearch({ language, setShowSearchCoupons }: CouponS
   const [searchString, setSearchString] = useState<string>("");
   const [searchResults, setSearchResults] = useState<CouponType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [activeCoupon, setActiveCoupon] = useState<CouponType | null>(null);
 
   async function handleSearch() {
     setIsLoading(true);
@@ -29,6 +30,29 @@ export default function CouponSearch({ language, setShowSearchCoupons }: CouponS
     }
     
     setIsLoading(false);
+  }
+
+  function handleEditClick(coupon: CouponType) {
+    setActiveCoupon(activeCoupon?.couponKey === coupon.couponKey ? null : coupon);
+  }
+
+  function handleActiveCouponChange(newValue: string | number, field: keyof CouponType) {
+    if (activeCoupon) {
+      setActiveCoupon({ ...activeCoupon, [field]: newValue });
+    }
+  }
+
+  function NumberInput({ value, field, active }: { value: string | number, field: keyof CouponType, active: boolean }) {
+    return active ? (
+      <input
+        type="number"
+        value={value}
+        className="activeCouponInput"
+        onChange={(e) => handleActiveCouponChange(Number(e.target.value), field)}
+      />
+    ) : (
+      <span>{value}</span>
+    );
   }
 
   return (
@@ -63,22 +87,36 @@ export default function CouponSearch({ language, setShowSearchCoupons }: CouponS
                   <th>Max Uses</th>
                   <th>Used</th>
                   <th>Last Used</th>
+                  <th></th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
-                {searchResults.map((coupon) => (
-                  <tr key={coupon.couponKey}>
-                    <td>{coupon.couponKey}</td>
-                    <td>{coupon.code || "N/A"}</td>
-                    <td>{coupon.productKey ?? "N/A"}</td>
-                    <td>{coupon.type}</td>
-                    <td>{coupon.target}</td>
-                    <td>{coupon.reward}</td>
-                    <td>{coupon.maxUses}</td>
-                    <td>{coupon.used}</td>
-                    <td>{coupon.lastUsed ? new Date(coupon.lastUsed).toLocaleString() : "Never"}</td>
-                  </tr>
-                ))}
+                {searchResults.map((coupon) => {
+                  const isActive = activeCoupon?.couponKey === coupon.couponKey;
+                  const isInactive = !isActive && activeCoupon !== null;
+                  return (
+                    <tr key={coupon.couponKey} style={{ backgroundColor: isInactive ? '#ccc' : isActive ? 'lightblue' : '#fff' }}>
+                      <td>{coupon.couponKey}</td>
+                      <td>
+                        {activeCoupon?.couponKey === coupon.couponKey ? (
+                          <input type="text" value={activeCoupon.code || "N/A"} className="activeCouponInput" style={{margin: 0}} onChange={(e) => handleActiveCouponChange(e.target.value, 'code')} />
+                        ) : (
+                          <span>{coupon.code || "N/A"}</span>
+                        )}
+                      </td>
+                      <td><NumberInput value={activeCoupon?.productKey ?? coupon.productKey ?? "N/A"} field="productKey" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
+                      <td><NumberInput value={activeCoupon?.type ?? coupon.type} field="type" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
+                      <td><NumberInput value={activeCoupon?.target ?? coupon.target} field="target" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
+                      <td><NumberInput value={activeCoupon?.reward ?? coupon.reward} field="reward" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
+                      <td><NumberInput value={activeCoupon?.maxUses ?? coupon.maxUses} field="maxUses" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
+                      <td><NumberInput value={activeCoupon?.used ?? coupon.used} field="used" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
+                      <td>{coupon.lastUsed ? new Date(coupon.lastUsed).toLocaleString() : "Never"}</td>
+                      <td onClick={() => handleEditClick(coupon)} style={{ cursor: 'pointer' }}>✏️</td>
+                      <td>🗑️</td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

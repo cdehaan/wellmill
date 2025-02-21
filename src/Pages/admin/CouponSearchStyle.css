@@ -11,7 +11,7 @@
 
 .couponSearchModal {
   height: 90%;
-  width: 50%;
+  width: 75%;
   background-color: white;
   margin: auto;
   padding: 20px;
@@ -39,4 +39,36 @@
   justify-content: center;
   align-items: center;
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
+
+.resultsContainer {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+}
+
+.resultsTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.resultsTable th, .resultsTable td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.resultsTable th {
+  background-color: #f4f4f4;
+  position: sticky;
+  top: 0;
+}
+
+.activeCouponInput {
+  width: 4rem;
+  font-size: 1.2rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
 }
