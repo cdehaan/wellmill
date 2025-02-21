@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { AdminDataType, CustomerType } from "../../types";
 import CallAPI from "../../Utilities/CallAPI";
 import { LanguageType, getText } from "./translations";
+import CouponSearch from "./CouponSearch";
 
 type CustomersProps = {
   adminData: AdminDataType | null;
@@ -58,6 +59,8 @@ export default function Customers({ adminData, loadAdminData, language }: Custom
 
   const [expandedCustomers, setExpandedCustomers] = useState<Set<number>>(new Set());
   const [expandedPurchases, setExpandedPurchases] = useState<Set<number>>(new Set());
+
+  const [activeCouponCode, setActiveCouponCode] = useState<string | boolean>(""); // allow "false" to hide the search modal
 
   function handleSortClick(event: React.MouseEvent<HTMLSpanElement>) {
     if (!(event.target instanceof HTMLElement)) return;
@@ -246,6 +249,8 @@ export default function Customers({ adminData, loadAdminData, language }: Custom
       const allLineItemInfo = <div style={{margin: "1.5rem", marginTop: 0, marginBottom:"0.5rem"}}>{lineItemHeader}{lineItemList}</div>
       const conditionalItemInfo = (lineItems.length === 0) ? <div style={{display:"flex", backgroundColor: "#ffa", padding: "0.5rem", margin: "1.5rem", marginTop: 0, marginBottom:"0.5rem"}}>No line items</div> : allLineItemInfo;
 
+      const usedCoupon = purchase.couponCode && purchase.couponCode !== "-";
+
       return (
         <>
           <div key={purchase.purchaseKey} style={{display:"flex", backgroundColor: "#dfe", padding: "0.0rem"}}>
@@ -258,7 +263,7 @@ export default function Customers({ adminData, loadAdminData, language }: Custom
             <span style={{width: "12rem", backgroundColor: "rgba(0,0,0,0.1)"}}>{formatDateToJapanTimezone(purchase.refundTime)}</span>
             <span style={{width: "6rem"}}>¥{purchase.amount || 0}</span>
             <span style={{width: "7rem", backgroundColor: "rgba(0,0,0,0.1)"}}>¥{purchase.couponDiscount || 0}</span>
-            <span style={{width: "6rem"}}>{purchase.couponCode || "-"}</span>
+            <span style={{width: "6rem", cursor: usedCoupon ? "pointer" : undefined, color: usedCoupon ? "#369" : undefined, textDecoration: usedCoupon ? "underline" : undefined}} onClick={() => {if(purchase.couponCode) {setActiveCouponCode(purchase.couponCode)}}}>{purchase.couponCode || "-"}</span>
           </div>
           {expandedPurchases.has(purchase.purchaseKey) ? (billingAddressInfo) : null}
           {expandedPurchases.has(purchase.purchaseKey) ? (conditionalItemInfo) : null}
@@ -391,6 +396,7 @@ export default function Customers({ adminData, loadAdminData, language }: Custom
 
   return (
     <div>
+      {activeCouponCode ? <CouponSearch language={language} code={activeCouponCode.toString()} setShowSearchCoupons={setActiveCouponCode} /> : null}
       <div style={{display:"flex", flexDirection:"column", margin: "2rem"}}>
         <h1>{getText("customers", language)}</h1>
         {getText("search", language)}: <input type="text" value={searchString} onChange={(event) => {setSearchString(event.target.value)}} />

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './CouponSearchStyle.css';
 import { CouponType } from '../../types';
 import CallAPI from '../../Utilities/CallAPI';
@@ -18,6 +18,12 @@ export default function CouponSearch({ language, setShowSearchCoupons, code }: C
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [activeCoupon, setActiveCoupon] = useState<CouponType | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
+
+  useEffect(() => {
+    if (initialCode) {
+      handleSearch();
+    }
+  }, [initialCode]);
 
   async function handleSearch() {
     setIsLoading(true);

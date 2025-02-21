@@ -41,6 +41,7 @@ export default function CheckoutForm({ setDisplayCheckout, addressesState }: Che
 
   const [couponCode, setCouponCode] = useState<string | null>(null);
   const [couponDiscount, setCouponDiscount] = useState<number>(0);
+  const [couponError, setCouponError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [couponMessage, setCouponMessage] = useState<string | null>(null);
   const [email, setEmail] = useState<string>(user?.email || "");
@@ -143,6 +144,11 @@ export default function CheckoutForm({ setDisplayCheckout, addressesState }: Che
 //    }
 
     const CallAPIResponse = await CallAPI(updateIntentData, "updatePaymentIntent");
+    if (CallAPIResponse.error) {
+      console.error("API error:", CallAPIResponse.error);
+      setCouponError(CallAPIResponse.error);
+      return;
+    }
     const couponDiscount = CallAPIResponse?.data?.couponDiscount || 0;
     setCouponDiscount(Math.min(couponDiscount, cart.cost));
     localStorage.setItem(couponKeyName, couponDiscount.toString());
