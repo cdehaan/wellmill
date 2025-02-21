@@ -46,6 +46,7 @@ export default function CouponSearch({ language, setShowSearchCoupons }: CouponS
   async function handleSaveClick() {
     if (!activeCoupon) return;
     setErrorMessage("");
+    setIsLoading(true);
     
     const requestBody = {
       token,
@@ -62,16 +63,38 @@ export default function CouponSearch({ language, setShowSearchCoupons }: CouponS
     try {
       const response = await CallAPI(requestBody, 'adminCouponUpdate');
       if (response.error === null) {
-        setIsLoading(true);
         setActiveCoupon(null);
         await handleSearch();
-        setIsLoading(false);
       } else {
         setErrorMessage("Error updating coupon: " + response.error);
       }
     } catch (error) {
       setErrorMessage("Error updating coupon:" + error);
     }
+    setIsLoading(false);
+  }
+
+  async function handleDeleteClick(couponKey: number) {
+    setErrorMessage("");
+    setIsLoading(true);
+
+    const requestBody = {
+      token,
+      couponKey,
+    };
+    
+    try {
+      const response = await CallAPI(requestBody, 'adminCouponDelete');
+      if (response.error === null) {
+        await handleSearch();
+      } else {
+        setErrorMessage("Error deleting coupon: " + response.error);
+      }
+    } catch (error) {
+      setErrorMessage("Error deleting coupon:" + error);
+    }
+
+    setIsLoading(false);
   }
 
   function handleActiveCouponChange(newValue: string | number, field: keyof CouponType) {
@@ -162,7 +185,7 @@ export default function CouponSearch({ language, setShowSearchCoupons }: CouponS
                         {isInactive ? null : isActive ? (
                           <div className='recordButton' onClick={handleCancelClick}>Cancel</div>
                         ) : (
-                          <span style={{display:"flex", justifyContent:"center", cursor: "pointer"}}>🗑️</span>
+                          <span style={{display:"flex", justifyContent:"center", cursor: "pointer"}} onClick={() => {handleDeleteClick(coupon.couponKey)}}>🗑️</span>
                         )}
                       </td>
                     </tr>
