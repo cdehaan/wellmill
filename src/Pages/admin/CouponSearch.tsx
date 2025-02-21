@@ -36,6 +36,14 @@ export default function CouponSearch({ language, setShowSearchCoupons }: CouponS
     setActiveCoupon(activeCoupon?.couponKey === coupon.couponKey ? null : coupon);
   }
 
+  function handleSaveClick() {
+    console.log(activeCoupon);
+  }
+
+  function handleCancelClick() {
+    setActiveCoupon(null);
+  }
+
   function handleActiveCouponChange(newValue: string | number, field: keyof CouponType) {
     if (activeCoupon) {
       setActiveCoupon({ ...activeCoupon, [field]: newValue });
@@ -87,8 +95,8 @@ export default function CouponSearch({ language, setShowSearchCoupons }: CouponS
                   <th>Max Uses</th>
                   <th>Used</th>
                   <th>Last Used</th>
-                  <th></th>
-                  <th></th>
+                  <th style={{width: "4rem"}}></th>
+                  <th style={{width: "4rem"}}></th>
                 </tr>
               </thead>
               <tbody>
@@ -96,11 +104,11 @@ export default function CouponSearch({ language, setShowSearchCoupons }: CouponS
                   const isActive = activeCoupon?.couponKey === coupon.couponKey;
                   const isInactive = !isActive && activeCoupon !== null;
                   return (
-                    <tr key={coupon.couponKey} style={{ backgroundColor: isInactive ? '#ccc' : isActive ? 'lightblue' : '#fff' }}>
+                    <tr key={coupon.couponKey} style={{ backgroundColor: isInactive ? '#ccc' : isActive ? 'lightblue' : '#fff', color: isInactive ? "#888" : isActive ? 'black' : 'inherit' }}>
                       <td>{coupon.couponKey}</td>
                       <td>
                         {activeCoupon?.couponKey === coupon.couponKey ? (
-                          <input type="text" value={activeCoupon.code || "N/A"} className="activeCouponInput" style={{margin: 0}} onChange={(e) => handleActiveCouponChange(e.target.value, 'code')} />
+                          <input type="text" value={activeCoupon.code || "N/A"} className="activeCouponInput" style={{margin: 0, width: "16rem"}} onChange={(e) => handleActiveCouponChange(e.target.value, 'code')} />
                         ) : (
                           <span>{coupon.code || "N/A"}</span>
                         )}
@@ -112,8 +120,20 @@ export default function CouponSearch({ language, setShowSearchCoupons }: CouponS
                       <td><NumberInput value={activeCoupon?.maxUses ?? coupon.maxUses} field="maxUses" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
                       <td><NumberInput value={activeCoupon?.used ?? coupon.used} field="used" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
                       <td>{coupon.lastUsed ? new Date(coupon.lastUsed).toLocaleString() : "Never"}</td>
-                      <td onClick={() => handleEditClick(coupon)} style={{ cursor: 'pointer' }}>✏️</td>
-                      <td>🗑️</td>
+                      <td>
+                        {isInactive ? null : isActive ? (
+                          <div className='recordButton' onClick={handleSaveClick}>Save</div>
+                        ) : (
+                          <span onClick={() => handleEditClick(coupon)} style={{ display:"flex", justifyContent:"center", cursor: 'pointer' }}>✏️</span>
+                        )}
+                      </td>
+                      <td>
+                        {isInactive ? null : isActive ? (
+                          <div className='recordButton' onClick={handleCancelClick}>Cancel</div>
+                        ) : (
+                          <span style={{display:"flex", justifyContent:"center", cursor: "pointer"}}>🗑️</span>
+                        )}
+                      </td>
                     </tr>
                   )
                 })}
