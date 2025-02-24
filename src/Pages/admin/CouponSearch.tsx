@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import './CouponSearchStyle.css';
 import { CouponType } from '../../types';
 import CallAPI from '../../Utilities/CallAPI';
+import { getText, LanguageType } from './translations';
 
 const token = window.location.search ? new URLSearchParams(window.location.search).get('token') || "" : localStorage.getItem('token') || "";
 
 type CouponSearchProps = {
-  language: string;
+  language: LanguageType;
   setShowSearchCoupons: (showSearchCoupons: boolean) => void;
   code?: string;
 };
@@ -130,20 +131,20 @@ export default function CouponSearch({ language, setShowSearchCoupons, code }: C
   return (
     <div className="couponSearchCover">
       <div className='couponSearchModal'>
-        <h1>Coupon Search</h1>
+        <h1>{getText("couponSearch", language)}</h1>
         {errorMessage && <p className="errorMessage">{errorMessage}</p>}
         <div className='couponSearchInput'>
           <input
             type="text"
-            placeholder="Enter coupon code"
+            placeholder={getText("enterCouponCode", language)}
             value={searchString}
             onChange={(e) => setSearchString(e.target.value)}
           />
           <span className='searchButton' onClick={handleSearch}>
-            {isLoading ? "Searching..." : "Search"}
+            {isLoading ? getText("searching...", language) : getText("search", language)}
           </span>
         </div>
-        <button onClick={() => setShowSearchCoupons(false)}>Back</button>
+        <button onClick={() => setShowSearchCoupons(false)}>{getText("close", language)}</button>
 
         {/* Results Table */}
         {searchResults.length > 0 && (
@@ -151,15 +152,15 @@ export default function CouponSearch({ language, setShowSearchCoupons, code }: C
             <table className="resultsTable">
               <thead>
                 <tr>
-                  <th>Coupon Key</th>
-                  <th>Code</th>
-                  <th>Product Key</th>
-                  <th>Type</th>
-                  <th>Target</th>
-                  <th>Reward</th>
-                  <th>Max Uses</th>
-                  <th>Used</th>
-                  <th>Last Used</th>
+                  <th>{getText("key", language)}</th>
+                  <th>{getText("couponCode", language)}</th>
+                  <th>{getText("productKey", language)}</th>
+                  <th>{getText("type", language)}</th>
+                  <th>{getText("couponTarget", language)}</th>
+                  <th>{getText("couponReward", language)}</th>
+                  <th>{getText("maxUses", language)}</th>
+                  <th>{getText("couponsUsed", language)}</th>
+                  <th>{getText("lastUsed", language)}</th>
                   <th style={{width: "4rem"}}></th>
                   <th style={{width: "4rem"}}></th>
                 </tr>
@@ -179,12 +180,12 @@ export default function CouponSearch({ language, setShowSearchCoupons, code }: C
                         )}
                       </td>
                       <td><NumberInput value={activeCoupon?.productKey ?? coupon.productKey ?? "N/A"} field="productKey" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
-                      <td><NumberInput value={activeCoupon?.type ?? coupon.type} field="type" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
+                      <td><NumberInput value={couponTypeName(activeCoupon?.type ?? coupon.type, language)} field="type" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
                       <td><NumberInput value={activeCoupon?.target ?? coupon.target} field="target" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
                       <td><NumberInput value={activeCoupon?.reward ?? coupon.reward} field="reward" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
                       <td><NumberInput value={activeCoupon?.maxUses ?? coupon.maxUses} field="maxUses" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
                       <td><NumberInput value={activeCoupon?.used ?? coupon.used} field="used" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
-                      <td>{coupon.lastUsed ? new Date(coupon.lastUsed).toLocaleString() : "Never"}</td>
+                      <td>{coupon.lastUsed ? new Date(coupon.lastUsed).toLocaleString() : "-"}</td>
                       <td>
                         {isInactive ? null : isActive ? (
                           <div className='recordButton' onClick={handleSaveClick}>Save</div>
@@ -209,4 +210,25 @@ export default function CouponSearch({ language, setShowSearchCoupons, code }: C
       </div>
     </div>
   );
+}
+
+function couponTypeName(type: number, language: "en" | "jp"): string {
+  let typeName = "";
+  switch (type) {
+    case 1:
+      typeName = language === "en" ? "Yen Discount" : language === "jp" ? "~~¥ 割引" : "Unknown language";
+      break;
+    case 2:
+      typeName = language === "en" ? "Percent Discount" : language === "jp" ? "~~% 割引" : "Unknown language";
+      break;
+    case 3:
+      typeName = language === "en" ? "Product Discount" : language === "jp" ? "製品 ~~¥ 割引" : "Unknown language";
+      break;
+    case 5:
+      typeName = language === "en" ? "Quantity Discount" : language === "jp" ? "製品 ~~% 割引" : "Unknown language";
+      break;
+    default:
+      typeName = "Unknown coupon type";
+  }
+  return typeName;
 }

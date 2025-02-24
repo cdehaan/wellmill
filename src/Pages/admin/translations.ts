@@ -19,6 +19,7 @@ const translations = [
     { id: "cancel", en: "Cancel", jp: "キャンセル" },
     { id: "delete", en: "Delete", jp: "削除" },
     { id: "search", en: "Search", jp: "検索" },
+    { id: "searching...", en: "Searching...", jp: "検索中..." },
     { id: "edit", en: "Edit", jp: "編集" },
     { id: "save", en: "Save", jp: "保存" },
     { id: "upload", en: "Upload", jp: "アップロード" },
@@ -26,6 +27,7 @@ const translations = [
     { id: "search", en: "Search", jp: "検索" },
     { id: "export", en: "Export", jp: "エクスポート" },
     { id: "none", en: "None", jp: "なし" },
+    { id: "close", en: "Close", jp: "閉じる" },
     { id: "advancedOptions", en: "Advanced options ▼", jp: "詳細オプション ▼" },
     { id: "actions", en: "Actions", jp: "アクション" },
 
@@ -68,7 +70,7 @@ const translations = [
     { id: "email", en: "Email", jp: "メール" },
     { id: "termsOfService", en: "Terms of service", jp: "利用規約" },
     { id: "latestCouponCode", en: "Latest coupon", jp: "最新のクーポン" },
-    { id: "couponsUsed", en: "Coupons used", jp: "クーポン数" },
+    { id: "couponsUsed", en: "Times used", jp: "使用回数" },
     { id: "couponDiscountsTotal", en: "Total discounts", jp: "割引合計" },
     { id: "currentDefaultAddress", en: "Current default address", jp: "現在のデフォルト住所" },
 
@@ -220,8 +222,13 @@ const translations = [
     { id: "unused", en: "Unused", jp: "未使用" },
     { id: "partiallyUsed", en: "Partly used", jp: "一部使用" },
     { id: "fullyUsed", en: "Fully used", jp: "使用済" },
+    { id: "lastUsed", en: "Last used", jp: "最後に使用した日付" },
 
     { id: "couponGroupNameRequired", en: "Group name is required", jp: "グループ名は必須です" },
+
+    { id: "couponSearch", en: "Coupon search", jp: "クーポン検索" },
+    { id: "enterCouponCode", en: "Enter coupon code", jp: "クーポンコードを入力" },
+    
 ];
 
 export default translations;
