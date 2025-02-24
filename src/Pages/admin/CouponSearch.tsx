@@ -17,6 +17,7 @@ export default function CouponSearch({ language, setShowSearchCoupons, code }: C
   const [searchString, setSearchString] = useState<string>(initialCode);
   const [searchResults, setSearchResults] = useState<CouponType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSubset, setIsSubset] = useState<boolean>(false);
   const [activeCoupon, setActiveCoupon] = useState<CouponType | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
 
@@ -38,6 +39,9 @@ export default function CouponSearch({ language, setShowSearchCoupons, code }: C
 
     if (responseData?.data?.coupons) {
       setSearchResults(responseData.data.coupons);
+    }
+    if (responseData?.data?.count) {
+      setIsSubset(responseData.data.count > 100);
     }
     
     setIsLoading(false);
@@ -65,7 +69,9 @@ export default function CouponSearch({ language, setShowSearchCoupons, code }: C
         productKey: activeCoupon.productKey,
         type: activeCoupon.type,
         target: activeCoupon.target,
-        reward: activeCoupon.reward,  
+        reward: activeCoupon.reward,
+        maxUses: activeCoupon.maxUses,
+        used: activeCoupon.used,
       }
     };
     
@@ -139,11 +145,19 @@ export default function CouponSearch({ language, setShowSearchCoupons, code }: C
             placeholder={getText("enterCouponCode", language)}
             value={searchString}
             onChange={(e) => setSearchString(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") { handleSearch(); } }}
           />
-          <span className='searchButton' onClick={handleSearch}>
+          <span
+            className='searchButton'
+            onClick={handleSearch}
+            tabIndex={0} // Makes it focusable
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { handleSearch(); } }}
+            role="button" // Improves accessibility
+          >
             {isLoading ? getText("searching...", language) : getText("search", language)}
           </span>
         </div>
+        {isSubset ? <span>{getText("100SubsetShown", language)}</span> : null}
         <button onClick={() => setShowSearchCoupons(false)}>{getText("close", language)}</button>
 
         {/* Results Table */}
@@ -169,6 +183,14 @@ export default function CouponSearch({ language, setShowSearchCoupons, code }: C
                 {searchResults.map((coupon) => {
                   const isActive = activeCoupon?.couponKey === coupon.couponKey;
                   const isInactive = !isActive && activeCoupon !== null;
+                  const typeSelect = (
+                    <select id="couponTypeSelect" onChange={(e) => {handleActiveCouponChange(Number(e.target.value), "type")}} disabled={!isActive} value={isActive ? activeCoupon?.type ?? coupon.type ?? 1 : coupon.type ?? 1} name="type" style={{margin: "0 1rem", border: isActive ? undefined : "none", padding: isActive ? undefined : "0", background: isActive ? "#fff" : "transparent"}}>
+                      <option value={1}>{getText("couponYenDiscount", language)}</option>
+                      <option value={2}>{getText("couponPercentDiscount", language)}</option>
+                      <option value={3}>{getText("couponProductDiscount", language)}</option>
+                      <option value={5}>{getText("couponProductPercentDiscount", language)}</option>
+                    </select>      
+                  );
                   return (
                     <tr key={coupon.couponKey} style={{ backgroundColor: isInactive ? '#ccc' : isActive ? 'lightblue' : '#fff', color: isInactive ? "#888" : isActive ? 'black' : 'inherit' }}>
                       <td>{coupon.couponKey}</td>
@@ -179,23 +201,23 @@ export default function CouponSearch({ language, setShowSearchCoupons, code }: C
                           <span>{coupon.code || "N/A"}</span>
                         )}
                       </td>
-                      <td><NumberInput value={activeCoupon?.productKey ?? coupon.productKey ?? "N/A"} field="productKey" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
-                      <td><NumberInput value={couponTypeName(activeCoupon?.type ?? coupon.type, language)} field="type" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
-                      <td><NumberInput value={activeCoupon?.target ?? coupon.target} field="target" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
-                      <td><NumberInput value={activeCoupon?.reward ?? coupon.reward} field="reward" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
-                      <td><NumberInput value={activeCoupon?.maxUses ?? coupon.maxUses} field="maxUses" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
-                      <td><NumberInput value={activeCoupon?.used ?? coupon.used} field="used" active={activeCoupon?.couponKey === coupon.couponKey} /></td>
+                      <td><NumberInput value={isActive ? activeCoupon?.productKey ?? coupon.productKey ?? "N/A" : coupon.productKey ?? "N/A"} field="productKey" active={isActive} /></td>
+                      <td>{typeSelect}</td>
+                      <td><NumberInput value={isActive ? activeCoupon?.target ?? coupon.target : coupon.target} field="target" active={isActive} /></td>
+                      <td><NumberInput value={isActive ? activeCoupon?.reward ?? coupon.reward : coupon.reward} field="reward" active={isActive} /></td>
+                      <td><NumberInput value={isActive ? activeCoupon?.maxUses ?? coupon.maxUses : coupon.maxUses} field="maxUses" active={isActive} /></td>
+                      <td><NumberInput value={isActive ? activeCoupon?.used ?? coupon.used : coupon.used} field="used" active={isActive} /></td>
                       <td>{coupon.lastUsed ? new Date(coupon.lastUsed).toLocaleString() : "-"}</td>
                       <td>
                         {isInactive ? null : isActive ? (
-                          <div className='recordButton' onClick={handleSaveClick}>Save</div>
+                          <div className='recordButton' onClick={handleSaveClick}>{getText("save", language)}</div>
                         ) : (
                           <span onClick={() => handleEditClick(coupon)} style={{ display:"flex", justifyContent:"center", cursor: 'pointer' }}>✏️</span>
                         )}
                       </td>
                       <td>
                         {isInactive ? null : isActive ? (
-                          <div className='recordButton' onClick={handleCancelClick}>Cancel</div>
+                          <div className='recordButton' style={{width: "5rem"}} onClick={handleCancelClick}>{getText("cancel", language)}</div>
                         ) : (
                           <span style={{display:"flex", justifyContent:"center", cursor: "pointer"}} onClick={() => {handleDeleteClick(coupon.couponKey)}}>🗑️</span>
                         )}
@@ -232,3 +254,5 @@ function couponTypeName(type: number, language: "en" | "jp"): string {
   }
   return typeName;
 }
+
+//                       <td><NumberInput value={couponTypeName(activeCoupon?.type ?? coupon.type, language)} field="type" active={activeCoupon?.couponKey === coupon.couponKey} /></td>

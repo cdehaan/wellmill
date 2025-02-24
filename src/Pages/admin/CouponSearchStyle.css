@@ -10,6 +10,8 @@
 }
 
 .couponSearchModal {
+  display: flex;
+  flex-direction: column;
   height: 90%;
   width: 75%;
   background-color: white;
@@ -58,7 +60,6 @@
 }
 
 .resultsContainer {
-  max-height: 300px;
   overflow-y: auto;
   border: 1px solid #ccc;
   margin-top: 10px;

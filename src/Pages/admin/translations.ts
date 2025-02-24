@@ -228,6 +228,7 @@ const translations = [
 
     { id: "couponSearch", en: "Coupon search", jp: "クーポン検索" },
     { id: "enterCouponCode", en: "Enter coupon code", jp: "クーポンコードを入力" },
+    { id: "100SubsetShown", en: "Top 100 results shown. Consider refining your search.", jp: "上位100件の結果が表示されます。検索条件を絞ることを検討してください。" },
     
 ];
 
