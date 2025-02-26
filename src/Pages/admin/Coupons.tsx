@@ -87,7 +87,7 @@ export default function Coupons({ adminData, loadAdminData, language }: CouponsP
           <option value={5}>{couponTypeName(5, language)}</option>
         </select>
         <label style={{display: (newCoupon?.type == 3 || newCoupon?.type == 5) ? undefined : "none"}} >{getText("couponProduct", language)}</label>
-        <select onChange={handleNewCouponChange} value={newCoupon?.productKey || ""} name="productKey" style={{display: newCoupon?.type == 3 ? undefined : "none"}}>
+        <select onChange={handleNewCouponChange} value={newCoupon?.productKey || ""} name="productKey" style={{display: (newCoupon?.type == 3 || newCoupon?.type == 5) ? undefined : "none"}}>
           {products.map((product) => <option key={product.productKey} value={product.productKey}>{product.title}</option>)}
         </select>
         <label>{getText("couponTarget", language)}</label>
