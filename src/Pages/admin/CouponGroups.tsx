@@ -361,12 +361,14 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
   });
 
   const csvCouponQuantity = csvCodes ? csvCodes.split(',').map(code => code.trim()).filter(code => code.length > 0).length : 0;
-  const productSelectDisabled = parseInt((document.getElementById("couponTypeSelect") as HTMLInputElement)?.value ?? 0) !== 3;
+  const selectedCouponType = parseInt((document.getElementById("couponTypeSelect") as HTMLInputElement)?.value ?? 0)
+  const productSelectDisabled = (selectedCouponType !== 3 && selectedCouponType !== 5);
 
   const couponDescription = couponTypeDescription(newCouponGroup.type, newCouponGroup.target, newCouponGroup.reward, newCouponGroup.productKey, language);
 
   function couponTypeDescription(type: number, target: number | string, reward: number | string, productKey: number | null, language: "en" | "jp"): string {
     let couponDescription = "";
+    const productTitle = products?.find(product => product.productKey === productKey)?.title || null;
     switch (type) {
       case 1:
         couponDescription =
@@ -383,13 +385,13 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
       case 3:
         couponDescription =
           language === "en" ? `If the customer buys at least ${target} of product [${products?.find(product => product.productKey === productKey)?.title || " ? "}], they will get a discount of ¥${reward}.` :
-          language === "jp" ? `顧客が「${products?.find(product => product.productKey === productKey)?.title || " (製品) "}」を${target}個以上購入すると、${reward}円の割引が受けられます。` :
+          language === "jp" ? `顧客が「${productTitle || " (製品) "}」を${target}個以上購入すると、${reward}円の割引が受けられます。` :
           "Unknown language";
         break;
       case 5:
         couponDescription =
           language === "en" ? `For the ${target} most expensive products of any type that the customer buys, they will get a discount of ${reward}% off those items.` :
-          language === "jp" ? `顧客が購入する商品の中で、最も高価な${target}個の商品に対して${reward}%の割引が適用されます。` :
+          language === "jp" ? `顧客が購入する商品の中で、${productTitle ? `「${productTitle}」` : " 最も高価な "}${target}個の商品に対して${reward}%の割引が適用されます。` :
           "Unknown language";
         break;
       default:
