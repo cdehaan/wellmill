@@ -184,7 +184,7 @@ export default function Customers({ adminData, loadAdminData, language }: Custom
 
   const customerList = customersSorted.map((customer, index) => {
     if (!customer.customerKey) return null;
-    if (customer.customerKey <= 17) return null;
+    //if (customer.customerKey <= 17) return null;
 
     let haystack = (customer.firstName || "") + (customer.lastName || "") + (customer.firstNameKana || "") + (customer.lastNameKana || "") + (customer.email || "");
 
