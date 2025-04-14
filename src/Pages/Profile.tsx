@@ -10,12 +10,16 @@ import { useUserData } from '../Hooks/useUserData';
 import { useBackupDB } from "../Hooks/useBackupDB";
 import { CustomerType } from "../types";
 import Cookies from "js-cookie";
+import { ValidateBirthdayString } from "../Utilities/BirthdayStrings";
 
 const breadcrumbs = [
   { text: "ホーム", url: "/" },
   { text: "マイページ", url: "/account" },
   { text: "アカウント情報", url: "/profile" },
 ];
+
+const IS_ANDROID = window.navigator.userAgent.toLowerCase().includes("android");
+//const IS_ANDROID = false;
 
 // Define an interface for input fields
 interface InputFields {
@@ -84,6 +88,10 @@ function Profile() {
     newPassword2: false,
   });
 
+  // start with an empty date or an existing value, so we should start on the assumption the date might be ok
+  // just used as a visual indicator, so it's ok if it doesn't match at the start, a more careful check is done later
+  const [validBirthday, setValidBirthday] = useState(true);
+
   // When user data becomes available, populate the fields with existing data. Also, on component load.
   // This will also fire when user data is saved, which is fine. (It's a good way to confirm, actually)
   useEffect(() => {
@@ -101,7 +109,7 @@ function Profile() {
           firstNameKana: user.firstNameKana || prevInputs.firstNameKana,
           gender: user.gender || prevInputs.gender,
           email: user.email || prevInputs.email,
-          birthday: user.birthday ? user.birthday.split('T')[0] : prevInputs.birthday, // This cuts the time off
+          birthday: user.birthday ? user.birthday.split('T')[0].replace(/-/g, '/') : prevInputs.birthday.replace(/-/g, '/'), // Always just the date, and always slashes
         };
       });
     }
@@ -130,6 +138,23 @@ function Profile() {
     }
   }
 
+  function handleBirthdayChange(event: ChangeEvent<HTMLInputElement>) {
+    let input = event.target.value;
+    input = input.replace(/\D/g, '');
+    if (input.length > 4) input = input.slice(0, 4) + '/' + input.slice(4);
+    if (input.length > 7) input = input.slice(0, 7) + '/' + input.slice(7);
+    // Limit to 10 characters (YYYY/MM/DD)
+    if (input.length > 10) input = input.slice(0, 10);
+
+    //console.log("Birthday input changed:", input);
+    setInputs({ ...inputs, birthday: input });
+    setValidBirthday(ValidateBirthdayString(input));
+    setInputErrors({
+      ...inputErrors,
+      birthday: false, // Reset error state when the user starts typing
+    });
+  }
+
   async function HandleRegistrationClick() {
     //console.log("update time. user:")
     //console.dir(user, { depth: null, colors: true });
@@ -149,8 +174,14 @@ function Profile() {
       }
     }
 
+    const validBirthdayFormat = ValidateBirthdayString(inputs.birthday);
+    if (!validBirthdayFormat) {
+      setInputErrors(prevErrors => ({ ...prevErrors, birthday: true }));
+      hasError = true;
+    }
+
     if (hasError) {
-      alert('Please fill in all required fields.');
+      alert('Please complete all required fields.');
       return;
     }
     //console.log("got everything")
@@ -338,7 +369,8 @@ function Profile() {
           <span className={styles.subheader}>性別<span className={styles.red}>必須</span></span>
           {genderRadio}
           <span className={styles.subheader}>生年月日<span className={styles.red}>必須</span></span>
-          <input type="date" id="datePicker" onChange={HandleInputChange} onClick={HandleDateClick} name="birthday" value={inputs.birthday} className={`${styles.signup} ${inputErrors.birthday ? styles.inputError : ''}`}/>
+          <input type="date" id="datePicker" onChange={HandleInputChange} onClick={HandleDateClick} name="birthday" value={inputs.birthday} className={`${styles.signup} ${inputErrors.birthday ? styles.inputError : ''}`} style={{display: IS_ANDROID ? "none" : undefined}} />
+          <input type="text" inputMode="numeric" placeholder="YYYY/MM/DD" value={inputs.birthday} onChange={handleBirthdayChange} style={{width: "100%", marginLeft: 0, marginRight: 0, fontFamily: 'monospace', display: IS_ANDROID ? undefined : "none", background: inputErrors.birthday ? "rgba(255,0,0,0.2)" : undefined, borderBottom: validBirthday ? undefined : "5px solid #800" }} />
           <span className={styles.subheader}>メールアドレス<span className={styles.red}>必須</span></span>
           <input type="email" placeholder="name@example.com" onChange={HandleInputChange} name="email" value={inputs.email} className={`${styles.signup} ${inputErrors.email ? styles.inputError : ''}`}></input>
           <span className={styles.subheader}>パスワード</span>

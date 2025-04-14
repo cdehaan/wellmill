@@ -7,6 +7,7 @@ import Header from "./Header";
 import '../App.css';
 import styles from "./sampleRegistration.module.css"
 import { useBackupDB } from "../Hooks/useBackupDB";
+import { ValidateBirthdayString } from "../Utilities/BirthdayStrings";
 
 const breadcrumbs = [
   { text: "ホーム", url: "/" },
@@ -14,7 +15,8 @@ const breadcrumbs = [
   { text: "検体IDの登録", url: "/sample-registration" },
 ];
 
-
+const IS_ANDROID = window.navigator.userAgent.toLowerCase().includes("android");
+//const IS_ANDROID = false;
 
 function SampleRegistration() {
   const { user, userLoading } = useContext(UserContext);
@@ -27,7 +29,8 @@ function SampleRegistration() {
 
   const now = new Date();
   now.setTime(now.getTime() + 9*60*60*1000); // Japan timezone = +9h
-  const [kentaiSaishubi, setKentaiSaishubi] = useState(now.toISOString().split('T')[0]);
+  const [kentaiSaishubi, setKentaiSaishubi] = useState(now.toISOString().split('T')[0].replace(/-/g, '/'));
+  const [validBirthday, setValidBirthday] = useState(true);
 
   // sad to use 'any', but I don't know what the server will return
   const { backupSampleData, data: sampleBackupData, error: sampleBackupError } = useBackupDB<any>();
@@ -78,9 +81,28 @@ function SampleRegistration() {
     }
   };
 
+  function handleBirthdayChange(event: React.ChangeEvent<HTMLInputElement>) {
+    let input = event.target.value;
+    input = input.replace(/\D/g, '');
+    if (input.length > 4) input = input.slice(0, 4) + '/' + input.slice(4);
+    if (input.length > 7) input = input.slice(0, 7) + '/' + input.slice(7);
+    // Limit to 10 characters (YYYY/MM/DD)
+    if (input.length > 10) input = input.slice(0, 10);
+    setKentaiSaishubi(input);
+    setValidBirthday(ValidateBirthdayString(input));
+  }
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if(!user || !user?.customerKey) { console.log(`Unknown user: ${user} or user code: ${user?.customerKey}, can't submit.`); return; }
+    if(!user || !user?.customerKey) {
+      console.log(`Unknown user: ${user} or user code: ${user?.customerKey}, can't submit.`);
+      return;
+    }
+    if(!validBirthday) {
+      console.log(`Invalid birthday: ${kentaiSaishubi}`);
+      alert("採取日が正しくありません。");
+      return;
+    }
     await backupSampleData(kentaiId, "NV" + user.customerKey, kentaiSaishubi);
     console.log(sampleBackupData);
   }
@@ -169,10 +191,13 @@ function SampleRegistration() {
         <span className={styles.subHeader2}>（IDが一致しているか念の為ご確認ください）</span>
         <img src="registerQR.jpg" alt="Sample QR code"/>
         <span className={styles.inputHeader}>検体ID<span className={styles.required}>必須</span></span>
-        <div className={styles.inputWrapper}><input type="text" style={{width: "100%", marginLeft: 0, marginRight: 0, backgroundColor: kentaiIdLock ? "#ffffff" : ""}} value={kentaiId} name="kentaiId" onChange={handleInputChange} disabled={kentaiIdLock ? false : false} />{kentaiIdLock ? /*null*/ clearButton : null}</div>
+        <div className={styles.inputWrapper}>
+          <input type="text" style={{width: "100%", marginLeft: 0, marginRight: 0, backgroundColor: kentaiIdLock ? "#ffffff" : ""}} value={kentaiId} name="kentaiId" onChange={handleInputChange} disabled={kentaiIdLock ? false : false} />{kentaiIdLock ? /*null*/ clearButton : null}
+        </div>
         {unknownId}
         <span className={styles.inputHeader}>採取日<span className={styles.required}>必須</span></span>
-        <input type="date" value={kentaiSaishubi} name="kentaiSaishubi" onChange={handleInputChange}></input>
+        <input type="date" value={kentaiSaishubi} name="kentaiSaishubi" onChange={handleInputChange} style={{display: IS_ANDROID ? "none" : undefined}} />
+        <input type="text" inputMode="numeric" placeholder="YYYY/MM/DD" value={kentaiSaishubi} onChange={handleBirthdayChange} style={{ width: "100%", fontFamily: 'monospace', display: IS_ANDROID ? undefined : "none", borderBottom: validBirthday ? undefined : "5px solid #800" }} />
 
         <div className="customCheckbox" style={{margin: "4rem 0 1rem 0"}}>
           <label className="customCheckbox">
