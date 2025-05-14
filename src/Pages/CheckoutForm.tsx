@@ -269,19 +269,20 @@ export default function CheckoutForm({ setDisplayCheckout, addressesState }: Che
     }
 
     const blockedDomains = [
-      "@docomo.ne.jp",
-      "@softbank.ne.jp",
-      "@i.softbank.jp",
-      "@vodafone.ne.jp",
-      "@ymobile.ne.jp",
-      "@ezweb.ne.jp",
-      "@au.com",
-      "@kddi.com",
-      "@rakuten.jp",
-      "@willcom.com",
-      "@emnet.ne.jp",
-      "@emobile.ne.jp",
-      "@ido.ne.jp",
+      "example.com",
+//      "@docomo.ne.jp",
+//      "@softbank.ne.jp",
+//      "@i.softbank.jp",
+//      "@vodafone.ne.jp",
+//      "@ymobile.ne.jp",
+//      "@ezweb.ne.jp",
+//      "@au.com",
+//      "@kddi.com",
+//      "@rakuten.jp",
+//      "@willcom.com",
+//      "@emnet.ne.jp",
+//      "@emobile.ne.jp",
+//      "@ido.ne.jp",
     ]
 
     for (const domain of blockedDomains) {

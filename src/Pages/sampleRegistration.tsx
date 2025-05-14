@@ -103,26 +103,16 @@ function SampleRegistration() {
       alert("採取日が正しくありません。");
       return;
     }
+    if(!researchAgreement) {
+      console.log(`User did not agree to research agreement`);
+      alert("研究利用と利用規約に同意してください。");
+      return;
+    }
     await backupSampleData(kentaiId, "NV" + user.customerKey, kentaiSaishubi);
     console.log(sampleBackupData);
   }
 
   function ToggleResearchAgreement() { setResearchAgreement(prev => { return !prev;}) }
-
-//  function getFormattedDate() {
-//    const today = new Date();
-//    const year = today.getFullYear();
-//    // Add 1 because getMonth() returns month from 0-11
-//    const month = today.getMonth() + 1;
-//    const day = today.getDate();
-//
-//    // Pad the month and day with a leading zero if they are less than 10
-//    const formattedMonth = month < 10 ? `0${month}` : month;
-//    const formattedDay = day < 10 ? `0${day}` : day;
-//
-//    // Format the date in YYYY年MM月DD日 format
-//    return `${year}年${formattedMonth}月${formattedDay}日`;
-//  }
 
   const registrationMessage = <span className={sampleBackupData?.Status === 200 ? styles.goodReply : styles.badReply}>{
     (!sampleBackupData) ? null : // No reply, don't display anything
@@ -203,11 +193,9 @@ function SampleRegistration() {
           <label className="customCheckbox">
             <input type="checkbox" id="customCheckbox" checked={researchAgreement} onChange={ToggleResearchAgreement} name="agreement"/>
             <span className="customCheckbox">✓</span>
-            <span><Link to="/research" className={styles.checkboxTextLink}>研究利用</Link>に同意する</span>
+            <span><Link to="/research" className={styles.checkboxTextLink}>研究利用</Link>と<Link to="https://well-mill.com/terms-of-use/" className={styles.checkboxTextLink}>利用規約</Link>に同意する</span>
           </label>
         </div>
-        <span className={styles.checkboxFooter}>研究利用への同意は任意です。</span>
-        <span className={styles.checkboxFooter}>チェックを外していただいてもサービスはご利用いただけます。</span>
         <img src="https://shop.well-mill.com/wellmillNewyears2025.png" alt="Well Mill Newyears message 2025" style={{display: "none", width: "100%", maxWidth: "400px", margin: "1rem 0"}} />
         <button onClick={handleSubmit}>登録</button>
         <span>{registrationMessage}</span>
