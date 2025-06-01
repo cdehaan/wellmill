@@ -346,6 +346,14 @@ function Signup() {
     </div>
   )
 
+  const footerMessage = (
+    <div style={{display: "flex", flexDirection: "column", width: "90%", fontSize: "0.75rem", gap: "0.25rem"}}>
+      <span>★登録が完了すると、完了通知メールが送信されます。</span>
+      <span>★30分以内に受信しない場合は、ご登録のメールアドレスが間違っている可能性があります。</span>
+      <span>★マイページにログイン後、メールアドレスの修正ができます。検体ID登録前に修正してください。</span>
+    </div>
+  )
+
   return (
     <>
       <div className="topDots" />
@@ -377,6 +385,7 @@ function Signup() {
         </div>
         {agreeCheckbox}
         <button className={`${styles.register} ${processingRegistration && styles.processing}`} onClick={HandleRegistrationClick}>登録</button>
+        {footerMessage}
         {createUserResponse?.data && <p>User created: {JSON.stringify(createUserResponse.data)}</p>}
         {createUserResponse?.error && <p>Error: {createUserResponse.error}</p>}
         {customerBackupData?.Status && (<span>{(customerBackupData?.Status === 200) ? "" : "Error"}</span>)}
