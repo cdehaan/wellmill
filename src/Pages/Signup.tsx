@@ -347,7 +347,7 @@ function Signup() {
   )
 
   const footerMessage = (
-    <div style={{display: "flex", flexDirection: "column", width: "90%", fontSize: "0.75rem", gap: "0.25rem"}}>
+    <div style={{display: "flex", flexDirection: "column", width: "90%", gap: "0.25rem"}}>
       <span>★登録が完了すると、完了通知メールが送信されます。</span>
       <span>★30分以内に受信しない場合は、ご登録のメールアドレスが間違っている可能性があります。</span>
       <span>★マイページにログイン後、メールアドレスの修正ができます。検体ID登録前に修正してください。</span>
