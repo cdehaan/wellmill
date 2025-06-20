@@ -13,6 +13,7 @@ import CouponGroups from "./CouponGroups";
 const registeredEmails = [
   "aya.sakamoto@reprocell.com",
   "toguchi@reprocell.com",
+  "wellmill@reprocelljp.com",
   //"urara.sato@reprocell.com",
   //"hayashi@homely.top",
 ];
