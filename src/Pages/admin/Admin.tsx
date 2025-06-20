@@ -11,11 +11,7 @@ import { LanguageType, getText } from "./translations";
 import CouponGroups from "./CouponGroups";
 
 const registeredEmails = [
-  "aya.sakamoto@reprocell.com",
-  "toguchi@reprocell.com",
   "wellmill@reprocelljp.com",
-  //"urara.sato@reprocell.com",
-  //"hayashi@homely.top",
 ];
 
 export default function Admin() {
