@@ -20,6 +20,7 @@ const translations = [
     { id: "delete", en: "Delete", jp: "削除" },
     { id: "search", en: "Search", jp: "検索" },
     { id: "searching...", en: "Searching...", jp: "検索中..." },
+    { id: "sending...", en: "Sending...", jp: "送信中..." },
     { id: "edit", en: "Edit", jp: "編集" },
     { id: "save", en: "Save", jp: "保存" },
     { id: "upload", en: "Upload", jp: "アップロード" },

@@ -207,11 +207,13 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
   }
 
   async function handleGroupCreate() {
-    if(!newCouponGroup?.name) {
+    // Check if there's already a request in progress
+    if (updatingGroups.includes(-1)) { return; }
+
+    if (!newCouponGroup?.name) {
       window.alert(getText("couponGroupNameRequired", language));
       return;
     }
-
 
     const requestBody = {
       token: token,
@@ -225,12 +227,20 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
     console.log(requestBody);
 
     setUpdatingGroups([...updatingGroups, -1]);
-    const responseData = await CallAPI(requestBody, "adminCouponGroupCreate");
-    console.log(responseData);
-    setTimeout(() => {
+
+    try {
+      const responseData = await CallAPI(requestBody, "adminCouponGroupCreate");
+      console.log(responseData);
+      
+      setTimeout(() => {
+        setUpdatingGroups(updatingGroups.filter(key => key !== -1));
+        loadAdminData();
+      }, 2000);
+    } catch (error) {
+      // Handle API error and ensure the updating/calling state is removed
+      console.error("Error creating coupon group:", error);
       setUpdatingGroups(updatingGroups.filter(key => key !== -1));
-      loadAdminData();
-    }, 500);
+    }
   }
 
   async function handleGroupAppend(couponGroupKey: number) {
@@ -598,8 +608,10 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
         <span style={{borderBottom: "1px dotted #888"}}>{couponDescription}</span>
         <div style={{display: "flex", justifyContent: "space-evenly", marginTop: "1rem"}}>
           <button onClick={() => {setNewCouponGroup(defaultCouponGroup); setShowAddCouponGroup(false)}}>{getText("cancel", language)}</button>
-          <button onClick={handleGroupCreate}>{getText("generateCouponGroup", language)}</button>
-        </div>
+          <button onClick={handleGroupCreate} disabled={updatingGroups.includes(-1)}>
+            {updatingGroups.includes(-1) ? getText("sending...", language) : getText("generateCouponGroup", language)}
+          </button>
+          </div>
       </div>
     </div>
   );
@@ -652,7 +664,7 @@ export default function CouponGroups({ adminData, loadAdminData, language }: Cou
           {exportButtons}
           {groupActions}
         </div>
-        <span><span style={{fontWeight:"bold"}}>{couponTypeName(couponGroup.type, language)}</span> - {couponTypeDescription(couponGroup.type, couponGroup.target, couponGroup.reward, couponGroup.productKey, language)} - {getText("maxUses", language)}: {couponGroup.maxUses}</span>
+        <span><span style={{fontWeight:"bold"}}>{couponTypeName(couponGroup.type, language)}</span> - {couponTypeDescription(couponGroup.type, couponGroup.target, couponGroup.reward, couponGroup.productKey, language)} - {getText("maxUses", language)}: {couponGroup.maxUses >= 1000000000 ? "∞" : couponGroup.maxUses}</span>
         <div style={{display: updatingGroups.includes(couponGroup.couponGroupKey) ? undefined : "none", position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5"}}></div>
       </div>
     );
