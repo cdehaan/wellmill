@@ -34,7 +34,6 @@ function Home() {
   const mainMenu = (
     <div className={styles.mainMenu}>
       <span className={styles.mainMenu}><Link to="/remote-examination">リモート検査とは？</Link></span>
-      <span className={styles.mainMenu}><Link to="/shop">SHOP</Link></span>
       <span className={styles.mainMenu}><Link to="/contact">お問い合わせ</Link></span>
       {user === null ?
         <span className={styles.mainMenu}><Link to="/login">ログイン</Link></span> :
