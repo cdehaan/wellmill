@@ -122,6 +122,7 @@ export default function Contact() {
                 <option value="商品について">商品について</option>
                 <option value="返品について">返品について</option>
                 <option value="検査結果について">検査結果について</option>
+                <option value="解約について">解約について</option>
                 <option value="その他">その他</option>
               </select>
               <span className={styles.selectChevron}>▼</span>
